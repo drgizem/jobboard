@@ -1,0 +1,29 @@
+@import "./colors"
+@import "./mixin"
+@import "./fonts"
+
+.scroll-text
+  @include scroll-text
+.jobs
+  gap: 7px
+  font-family: $font-main
+  .card
+    margin-left:0px
+    .post_date
+      @include font-size
+
+    .salary
+      background-color: $main-color
+  
+    .description
+      @include font-size
+
+    .buttons
+      @include flex-center
+
+.page
+  display: flex
+  flex-direction:row
+  justify-content: center
+  margin-bottom: 0px
+  margin-top: 10px
