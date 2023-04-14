@@ -6,8 +6,6 @@ import {Link, Navigate} from "react-router-dom"
 import { AuthContext } from "../AuthContext"
 import {auth} from "../firebase"
 import {signInWithEmailAndPassword} from "firebase/auth"
-import {setDoc,doc} from "firebase/firestore"
-import {db} from "../firebase"
 
 export const Signin=()=>{
   const [user,setUser]=useState<UserData>({} as UserData)
@@ -32,12 +30,6 @@ export const Signin=()=>{
         type:"login",payload:user
       })
     })
-    .then(()=>{
-      setDoc(doc(db,"users",`${auth.currentUser!.uid}`),{
-        savedJobs:[],
-        search:[]
-      })
-    })
     .catch((error)=>{
       console.log(error.message)
       error.message.includes("wrong-password") && setError(true)
@@ -50,8 +42,8 @@ export const Signin=()=>{
     <Form onSubmit={handleSubmit} validated={validated} style={{maxWidth:"500px"}} className="form">
       <h2 className="mb-4">Signin</h2>
       <Form.Control className="mb-3" required onChange={handleChange} name="email" placeholder="Enter your email" type="email" value={user.email || ""}/>
-      <Form.Control className="mb-3" required onChange={handleChange}  name="password" value={user.password || ""}  type="password" placeholder="Enter your password"/>
-      {error && <Form.Text className="mb-3 error">Wrong password !</Form.Text>}
+      <Form.Control className="mb-3" style={error ? {borderColor:"red", backgroundImage:"none"} : {borderColor:"#ced4da"}} required onChange={handleChange}  name="password" value={user.password || ""}  type="password" placeholder="Enter your password"/>
+      {error && <Form.Text className="mb-3 text-danger">Wrong password !</Form.Text>}
       <Form.Text className="mb-3 d-flex">Create an account<Link to="/signup"><div>Sign up</div></Link></Form.Text>
       <Button variant="success"type="submit">Sign in</Button>
     </Form>

@@ -17,6 +17,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import {useContext, useState,useEffect} from "react"
 import { AuthContext } from '../AuthContext';
 import {Container,Row,Col,Form,Button,Stack,Card} from "react-bootstrap"
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BlockIcon from '@mui/icons-material/Block';
 import {Job,Filter, SearchJob} from "../types"
@@ -40,7 +41,8 @@ const [filter,setFilter]=useState<Filter>({
   posted:"",
   employ:""
 })
-const {state,dispatch}=useContext(AuthContext)
+const {state}=useContext(AuthContext)
+const [search,setSearch]=useState<boolean>(false)
 
 const date = new Date();
 let day = date.getDate();
@@ -58,10 +60,10 @@ useEffect(()=>{
       const data=await res.json();
       setList(data.results)
   }
-  fetchApi()
+  fetchApi()// eslint-disable-next-line
 },[filter,page])
 
-const handleChange=(e:any)=>{
+const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
   const {name,value}=e.target
   setJob((preJob)=>{
     return {...preJob,[name]:value}
@@ -78,13 +80,13 @@ const onIncreasePage=()=>{
 const onDecreasePage=()=>{
   setPage(page-1)
 }
-const handleDetail=(e:any)=>{
+const handleDetail=(e:React.ChangeEvent<HTMLSelectElement>)=>{
   const {name,value}=e.target
   setFilter((pre)=>{
     return {...pre,[name]:value}
   })
 }
-const handleClick=(job:SearchJob)=>{
+const handleClick=async(job:SearchJob)=>{
   setFilter({
     posted:"",
     employ:"",
@@ -96,22 +98,36 @@ const handleClick=(job:SearchJob)=>{
     id:uuid(),
     searchDate:currentDate
   }
+  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+  const listRef=await getDoc(userRef)
+  const dbList=listRef.data()
+  const newSearchJobs=[...dbList!.search,searchObj]
+  setDoc(userRef,{...dbList,search:newSearchJobs})
 
-  dispatch({type:"search",payload:searchObj})
+  setSearch(true)
 }
 const onSave=async(id:string)=>{
-  
+  state.userInfo.email ==="" && setSignin(true)
   const favJob=list.find(item=>item.id===id)
-  state.userInfo.email !=="" ? dispatch({
-    type:"save",payload:{
-        title:favJob!.title,
-        company:favJob!.company,
-        location:favJob!.location,
-        id:favJob!.id,
-        savedDate:currentDate
-    }
-  }) : setSignin(true)
-  
+  const saved={
+    title:favJob!.title,
+    company:favJob!.company.display_name,
+    location:favJob!.location.display_name,
+    id:favJob!.id,
+    savedDate:currentDate}
+  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+  const listRef=await getDoc(userRef)
+  const dbList=listRef.data()
+  const newList={...dbList!}
+  let oldJobIndex=newList.savedJobs.findIndex((job:any)=>job.id===favJob!.id)
+
+  if(oldJobIndex === -1){
+    const newSavedJobs=[...dbList!.savedJobs,saved]
+    setDoc(userRef,{...dbList,savedJobs:newSavedJobs})
+  } else{
+    updateDoc(userRef,{...dbList})
+  }
+ 
 }
   return (
     <Container >
@@ -132,71 +148,98 @@ const onSave=async(id:string)=>{
     </Stack>
     </Row>
     <hr></hr>
-    {list.length ===0 && <div className="scroll-container"><p className="scroll-text">Find your job, let's go!</p></div>}
-    {list.length !==0 && (<Row className="mb-3">
+    {search ? 
+        list.length===0 ? 
+        <>
+    <Row className="mb-3">
       <Col>
       <Form.Select aria-label="Default select example" name="posted" onChange={handleDetail} value={filter.posted}>
-    <option>Date posted</option>
+    <option value="">Date posted</option>
     <option value="&max_days_old=5" >Last 5 days</option>
     <option value="&max_days_old=10" >Last 10 days</option>
     <option value="&max_days_old=30" >Last 30 days</option>
   </Form.Select></Col>
       <Col>
       <Form.Select aria-label="Default select example" name="salary" onChange={handleDetail} value={filter.salary}>
-    <option>Salary estimate</option>
+    <option value="">Salary estimate</option>
     <option value="&salary_min=30000">$30,000+</option>
     <option value="&salary_min=50000">$50,000+</option>
     <option value="&salary_min=70000">$70,000+</option>
   </Form.Select></Col>
       <Col>
       <Form.Select aria-label="Default select example" name="employ" onChange={handleDetail} value={filter.employ}>
-    <option>Employment type</option>
+    <option value="">Employment type</option>
     <option value="&full_time=1">Full-time</option>
     <option value="&part_time=1">Part-time</option>
     <option value="&contract=1">Contract</option>
   </Form.Select></Col>
-  </Row>)}
-    <Row className="jobs">
-    {list.map((job:Job,key:number)=>{
-      return (
-        <Card key={job.id}>
-        <Card.Body>
-          <Row>
-            <Col xs={1} >
-            <div>{category.filter((item)=>{
-           return item.label===list[0].category.label})[0].icon}</div></Col>
-            <Col>
-            <Card.Title>{job.title}</Card.Title>
-          <Card.Subtitle className="mb-2 text-muted">{job.company.display_name}</Card.Subtitle></Col>
-          </Row>
-          <Row>
-          <div className="post_date">Posted on {monthsStr[Number(job.created.slice(5,7))-1]} {job.created.slice(8,10)}</div>
-          <Col xs={3}>
-          <Card.Text className="salary">
-            From {job.salary_min}$ a year
-          </Card.Text></Col>
-          <Card.Text className="description">
-            {job.description}
-          </Card.Text>
-          </Row>
-          <Row className="mt-2">
-            <div className="buttons">
-          <Button variant="success">Apply</Button>
-          <div className="icons">
-          <Card.Link ><FavoriteIcon style={{color:"red"}} onClick={()=>onSave(job.id)}/></Card.Link>
-          <Card.Link href="#" className="m-0" ><BlockIcon onClick={()=>deleteJob(job.id)} className="text-success"/></Card.Link>
-          </div>   
-          </div></Row>
-        </Card.Body>
-      </Card>
-      )    
-})}
-    </Row>
+  </Row>
+  <div className="no_found mt-5">*No found jobs, try again</div> </>
+   : <><Row className="mb-3">
+   <Col>
+   <Form.Select aria-label="Default select example" name="posted" onChange={handleDetail} value={filter.posted}>
+ <option value="">Date posted</option>
+ <option value="&max_days_old=5" >Last 5 days</option>
+ <option value="&max_days_old=10" >Last 10 days</option>
+ <option value="&max_days_old=30" >Last 30 days</option>
+</Form.Select></Col>
+   <Col>
+   <Form.Select aria-label="Default select example" name="salary" onChange={handleDetail} value={filter.salary}>
+ <option value="">Salary estimate</option>
+ <option value="&salary_min=30000">$30,000+</option>
+ <option value="&salary_min=50000">$50,000+</option>
+ <option value="&salary_min=70000">$70,000+</option>
+</Form.Select></Col>
+   <Col>
+   <Form.Select aria-label="Default select example" name="employ" onChange={handleDetail} value={filter.employ}>
+ <option value="">Employment type</option>
+ <option value="&full_time=1">Full-time</option>
+ <option value="&part_time=1">Part-time</option>
+ <option value="&contract=1">Contract</option>
+</Form.Select></Col>
+</Row>
+   <Row className="jobs">
+        {list.map((job:Job,key:number)=>{
+          return (
+            <Card key={job.id}>
+            <Card.Body>
+              <Row>
+                <Col xs={1} >
+                <div>{category.filter((item)=>{
+               return item.label===list[0].category.label})[0].icon}</div></Col>
+                <Col>
+                <Card.Title>{job.title}</Card.Title>
+              <Card.Subtitle className="mb-2 text-muted">{job.company.display_name}</Card.Subtitle></Col>
+              </Row>
+              <Row>
+              <div className="post_date">Posted on {monthsStr[Number(job.created.slice(5,7))-1]} {job.created.slice(8,10)}</div>
+              <Col xs={3}>
+              {job.salary_min && <Card.Text className="salary">
+                From {job.salary_min}$ a year
+              </Card.Text>}</Col>
+              <Card.Text className="description">
+                {job.description}
+              </Card.Text>
+              </Row>
+              <Row className="mt-2">
+                <div className="buttons">
+              <Button variant="success">Apply</Button>
+              <div className="icons">
+              <Card.Link ><FavoriteBorderIcon className="hearticon" onClick={()=>onSave(job.id)}/></Card.Link>
+              <Card.Link href="#" className="m-0" ><BlockIcon onClick={()=>deleteJob(job.id)} className="text-success"/></Card.Link>
+              </div>   
+              </div></Row>
+            </Card.Body>
+          </Card>
+          )    
+    })}
+    </Row></>
+    : list.length ===0 && <div className="scroll-container"><p className="scroll-text">Find your job, let's go!</p></div>}
    {list.length !==0 && 
    (<div className="page">
    <ArrowBackIosIcon style={{visibility: page===1 ? "hidden" : "visible"}} onClick={onDecreasePage} />
    <p>{page}</p>
-   <ArrowForwardIosIcon onClick={onIncreasePage} /></div>)} 
+   {list.length>page*9 && <ArrowForwardIosIcon onClick={onIncreasePage} />}</div>)} 
   </Container>
   )
 }

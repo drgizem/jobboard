@@ -9,9 +9,12 @@ import { Navbarmodal } from './components/Navbar';
 import { Saved } from './components/Saved';
 import {Searchjob} from "./components/Search"
 import { Profile } from './components/Profile';
+import {RequireAuth} from "./components/Require"
+
 
 
 function App() {
+
   return (
     <div className="App">
       <Navbarmodal/>
@@ -19,9 +22,9 @@ function App() {
       <Route path="/" element={<Home/>}/>
       <Route path="/signin" element={<Signin/>}/>
       <Route path="/signup" element={<Signup/>}/>
-      <Route path="/savedjobs" element={<Saved/>}/>
-      <Route path="/recentsearch" element={<Searchjob/>}/>
-      <Route path="/profile" element={<Profile/>}/>
+      <Route path="/savedjobs" element={<RequireAuth><Saved/></RequireAuth>}/>
+      <Route path="/recentsearch" element={<RequireAuth><Searchjob/></RequireAuth>}/>
+      <Route path="/profile" element={<RequireAuth><Profile/></RequireAuth>}/>
      </Routes>
     </div>
   )

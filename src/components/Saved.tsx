@@ -1,27 +1,39 @@
 import {Container,Card,Button} from "react-bootstrap"
 import "../styles/Savedjobs.sass"
-import React, { useContext } from "react"
-import {AuthContext} from "../AuthContext"
+import React, { useEffect, useState } from "react"
 import BlockIcon from '@mui/icons-material/Block';
 import { SavedJob } from "../AuthContext";
-
+import { setDoc,getDoc,doc, onSnapshot } from "firebase/firestore";
+import {db,auth} from "../firebase"
 
 export const Saved=()=>{
-  const {state,dispatch}=useContext(AuthContext)
+  const [saveList,setSaveList]=useState<SavedJob[]>([])
+  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
 
-  const deleteJob=(id:string)=>{
-    const job=state.savedJobs.filter((item)=>item.id!==id)
-    dispatch({
-      type:"deleteJob",payload:job
+  useEffect(()=>{
+    const unSubscribe=onSnapshot(userRef,(doc)=>{
+      const dbList=doc.data()
+      const list=dbList!.savedJobs
+      setSaveList(list)
     })
+    return ()=>{
+      unSubscribe()} // eslint-disable-next-line
+  },[])
+
+  const deleteJob=async(id:string)=>{
+    const listRef=await getDoc(userRef)
+    const dbList=listRef.data()
+    const job=dbList!.savedJobs.filter((item:any)=>item.id!==id)
+    setDoc(userRef,{...dbList,savedJobs:job})
+
   }
 
   return(<>
     <Container className="mt-5 container">
       <h1>My jobs</h1>
       <hr></hr>
-      {state.savedJobs.length===0 && <div>There are no saved jobs</div>}
-      {state.savedJobs.map((job:SavedJob,key:number)=>{
+      {saveList.length===0 && <div>There are no saved jobs</div>}
+      {saveList.map((job:SavedJob,key:number)=>{
         return (
           <Card className="mb-3">
           <Card.Body>

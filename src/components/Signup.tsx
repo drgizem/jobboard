@@ -1,19 +1,21 @@
 import {Container,Form,Button,Card} from "react-bootstrap"
 import "../styles/Signup.sass"
 import React, { useContext, useState } from "react";
-import {Navigate} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {NewUser} from "../types"
 import {auth} from "../firebase"
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { AuthContext } from "../AuthContext";
 import google from "../google.png"
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth"
+import {setDoc,doc} from "firebase/firestore"
+import {db} from "../firebase"
 
 export const Signup=()=>{
   const [newUser,setNewUser]=useState<NewUser>({} as NewUser)
-  const [signup,setSignup]=useState<boolean>(false)
   const [validated, setValidated] = useState(false);
   const {dispatch}=useContext(AuthContext)
+  const navigate= useNavigate()
 
 
   const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
@@ -36,20 +38,26 @@ export const Signup=()=>{
         type:"login",payload:auth.currentUser
       })
    })
+   .then(()=>{
+    setDoc(doc(db,"users",`${auth.currentUser!.uid}`),{
+      savedJobs:[],
+      search:[]
+    })
+  })
+  .then(()=> navigate("/"))
    .catch((error)=>{
       console.log(error.message)
    })
+   
   }
   const handleGoogle=()=>{
     const provider=new GoogleAuthProvider()
     signInWithPopup(auth,provider)
-    .then(()=>{
-      setSignup(true)
-    })
+    .then(()=> 
+    navigate("/"))
   }
   return(
     <Container className="container">
-      {signup && <Navigate to="/signin"/>}
       <Form onSubmit={handleSubmit} validated={validated} style={{maxWidth:"500px"}} className="form">
         <h2 className="mb-4">Sign up</h2>
       <Form.Group className="mb-3">

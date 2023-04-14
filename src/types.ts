@@ -17,7 +17,7 @@ export type Job={
   title:string,
   category:Category,
   company:Company,
-  location:string,
+  location:Location,
   salary_min:number,
   created:string,
   description:string,
@@ -29,6 +29,10 @@ export type Company={
 }
 export type Category={
   label:string
+}
+export type Location={
+  display_name:string,
+  area:Array<string>
 }
 export type SearchJob={
   title:string,

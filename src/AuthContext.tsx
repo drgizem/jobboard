@@ -19,7 +19,7 @@ export type SavedJob={
   company:Company,
   location:string,
   id:string,
-  savedDate:string
+  savedDate:string,
 }
 export type Company={
   display_name:string
@@ -47,8 +47,7 @@ export const AuthContext = createContext<{
 
 export const AuthContextProvider=({children}:{ children: React.ReactNode })=>{
   const[state,dispatch]=useReducer(AuthReducer,INITIAL_STATE)
- console.log(state.userInfo)
- console.log(state.savedJobs)
+
   useEffect(()=>{
     localStorage.setItem("user", JSON.stringify(state.userInfo))
   },[state.userInfo])

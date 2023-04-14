@@ -1,24 +1,38 @@
-import { useContext } from "react"
+import {useState,useEffect } from "react"
 import "../styles/Search.sass"
-import { AuthContext } from "../AuthContext"
 import { Container,Card } from "react-bootstrap"
 import {Search} from "../AuthContext"
 import ClearIcon from '@mui/icons-material/Clear';
+import { setDoc,getDoc,doc, onSnapshot } from "firebase/firestore";
+import {db,auth} from "../firebase"
 
 export const Searchjob=()=>{
-  const {state,dispatch}=useContext(AuthContext)
+  const [list,setList]=useState<Search[]>([])
+  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
 
-  const deleteSearch=(id:string)=>{
-    dispatch({
-      type:"deleteSearch",payload:id
+  useEffect(()=>{
+    const unSubscribe=onSnapshot(userRef,(doc)=>{
+      const dbList=doc.data()
+      const list=dbList!.search
+      setList(list)
     })
+    return ()=>{
+      unSubscribe()
+    }// eslint-disable-next-line
+  },[])
+
+  const deleteSearch=async(id:string)=>{
+    const listRef=await getDoc(userRef)
+    const dbList=listRef.data()
+    const job=dbList!.search.filter((item:any)=>item.id!==id)
+    setDoc(userRef,{...dbList,search:job})
   }
   return(
     <Container>
-      <h2>My Recent Searches</h2>
+      <h2 className="mt-5">My Recent Searches</h2>
       <hr></hr>
-      {state.search.length ===0 && <div>*No recent search</div>}
-      {state.search && state.search.map((job:Search,key:number)=>{
+      {list.length ===0 && <div>*No recent search</div>}
+      {list && list.map((job:Search,key:number)=>{
         return (<><Card className="mb-3">
           <Card.Body style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div><p>{job.title}</p>
