@@ -7,6 +7,8 @@ import { Signup } from './components/Signup';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbarmodal } from './components/Navbar';
 import { Saved } from './components/Saved';
+import {Searchjob} from "./components/Search"
+import { Profile } from './components/Profile';
 
 
 function App() {
@@ -18,6 +20,8 @@ function App() {
       <Route path="/signin" element={<Signin/>}/>
       <Route path="/signup" element={<Signup/>}/>
       <Route path="/savedjobs" element={<Saved/>}/>
+      <Route path="/recentsearch" element={<Searchjob/>}/>
+      <Route path="/profile" element={<Profile/>}/>
      </Routes>
     </div>
   )

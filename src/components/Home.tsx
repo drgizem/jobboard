@@ -19,8 +19,10 @@ import { AuthContext } from '../AuthContext';
 import {Container,Row,Col,Form,Button,Stack,Card} from "react-bootstrap"
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BlockIcon from '@mui/icons-material/Block';
-import {Job,Filter} from "../types"
+import {Job,Filter, SearchJob} from "../types"
 import uuid from "react-uuid";
+import { setDoc,getDoc,doc, updateDoc } from "firebase/firestore";
+import {db,auth} from "../firebase"
 
 export const category=[{label:"Accounting & Finance Jobs",icon:<AttachMoneyIcon/>},{label:"Sales Jobs",icon:<AttachMoneyIcon/>},{label:"IT Jobs",icon:<ComputerIcon/>},{label:"Engineering Jobs",icon:<ComputerIcon/>},
 {label:"Customer Services Jobs",icon:<PersonAddAltIcon/>},{label:"HR & Recruitment Jobs",icon:<PersonAddAltIcon/>},{label:"Trade & Construction Jobs",icon:<PersonAddAltIcon/>},
@@ -30,7 +32,7 @@ export const category=[{label:"Accounting & Finance Jobs",icon:<AttachMoneyIcon/
 
 export const Home=()=>{
 const [list,setList]=useState<Job[]>([])
-const [job,setJob]=useState<Job>({} as Job)
+const [job,setJob]=useState<SearchJob>({} as SearchJob)
 const [page,setPage]=useState<number>(1)
 const [signin,setSignin]=useState<boolean>(false)
 const [filter,setFilter]=useState<Filter>({
@@ -82,19 +84,25 @@ const handleDetail=(e:any)=>{
     return {...pre,[name]:value}
   })
 }
-const handleClick=()=>{
+const handleClick=(job:SearchJob)=>{
   setFilter({
     posted:"",
     employ:"",
     salary:""
   })
-  dispatch({
-    type:"search",payload:{title:job.title,location:job.location,id:uuid(),searchDate:currentDate}
-  })
+  const searchObj = {
+    title:job.title,
+    location:job.location,
+    id:uuid(),
+    searchDate:currentDate
+  }
+
+  dispatch({type:"search",payload:searchObj})
 }
-const onSave=(id:string)=>{
+const onSave=async(id:string)=>{
+  
   const favJob=list.find(item=>item.id===id)
-  state.userInfo ? dispatch({
+  state.userInfo.email !=="" ? dispatch({
     type:"save",payload:{
         title:favJob!.title,
         company:favJob!.company,
@@ -103,9 +111,10 @@ const onSave=(id:string)=>{
         savedDate:currentDate
     }
   }) : setSignin(true)
+  
 }
   return (
-    <Container>
+    <Container >
      {signin && <Navigate to="/signin"/>}
     <Row className="mt-5">
       <Stack direction="horizontal" gap={5}>
@@ -117,7 +126,7 @@ const onSave=(id:string)=>{
       <Form.Label>Where</Form.Label>
       <Form.Control className="me-auto" type="text" placeholder="United States" name="location" value={job.location || ""} onChange={handleChange}/>
     </Form.Group>
-    <Button variant="success" onClick={handleClick}>
+    <Button variant="success" onClick={()=>handleClick(job)}>
       Search
     </Button>
     </Stack>

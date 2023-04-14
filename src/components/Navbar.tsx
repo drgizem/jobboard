@@ -11,6 +11,7 @@ import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import {auth} from "../firebase"
 import { signOut } from "firebase/auth"
 
+
 export const Navbarmodal=()=>{
   const {state,dispatch}=useContext(AuthContext)
 
@@ -21,20 +22,21 @@ export const Navbarmodal=()=>{
         type:"logout"
       })
     })
+    localStorage.setItem("user","")
   }
 
   return(
     <Navbar expand="lg" bg="dark" variant="dark" className='navbar'>
       <Container>
         <Navbar.Brand><Link to="/"><img className="icon" src={clover} alt=""/></Link></Navbar.Brand>
-        {!state.isLogin ? <Link to='/signin' className="signin">Sign in</Link>
+        {state.userInfo.email==="" ? <Link to='/signin' className="signin">Sign in</Link>
             : (
               <Dropdown drop="start">
                 <Dropdown.Toggle className="bg-dark" style={{border:"none"}} id="dropdown-basic">
                  <Person2Icon/>
                </Dropdown.Toggle>
                 <Dropdown.Menu >
-                  <Dropdown.Item className="dropdown_text"></Dropdown.Item>
+                <Dropdown.Item className="dropdown_text">{state.userInfo.email}</Dropdown.Item>
                  <Link to="/profile" className="dropdown_saved"><AssignmentIndIcon className="text-secondary"/>Profile</Link><br></br>
                  <Link to="/recentsearch" className="dropdown_saved"><SearchIcon/>Recent Searches</Link><br></br>
                  <Link to="/savedjobs" className="dropdown_saved"><FavoriteIcon className="text-success"/> Saved jobs</Link>

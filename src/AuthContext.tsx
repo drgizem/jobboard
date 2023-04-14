@@ -1,12 +1,18 @@
-import { createContext, useReducer } from "react"
+import { createContext, useEffect, useReducer } from "react"
 import { AuthReducer } from "./AuthReducer"
 
 
 export type InitialStateType={
-  userInfo:string,
+  userInfo:UserInfo,
   isLogin:boolean,
   savedJobs:SavedJob[],
   search:Search[]
+}
+export type UserInfo={
+  email:string,
+  uid:string,
+  displayName:string,
+  photoURL:string
 }
 export type SavedJob={
   title:string,
@@ -25,7 +31,7 @@ export type Search={
   searchDate:string
 }
 export const INITIAL_STATE:InitialStateType={
-  userInfo:"",
+  userInfo:JSON.parse(localStorage.getItem("user") ||"") || {},
   isLogin:false,
   savedJobs:[],
   search:[]
@@ -41,6 +47,11 @@ export const AuthContext = createContext<{
 
 export const AuthContextProvider=({children}:{ children: React.ReactNode })=>{
   const[state,dispatch]=useReducer(AuthReducer,INITIAL_STATE)
+ console.log(state.userInfo)
+ console.log(state.savedJobs)
+  useEffect(()=>{
+    localStorage.setItem("user", JSON.stringify(state.userInfo))
+  },[state.userInfo])
 
   return (
     <AuthContext.Provider value={{dispatch,state}}>{children}</AuthContext.Provider>

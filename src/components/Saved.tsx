@@ -17,7 +17,7 @@ export const Saved=()=>{
   }
 
   return(<>
-    <Container className="mt-5">
+    <Container className="mt-5 container">
       <h1>My jobs</h1>
       <hr></hr>
       {state.savedJobs.length===0 && <div>There are no saved jobs</div>}

@@ -30,3 +30,7 @@ export type Company={
 export type Category={
   label:string
 }
+export type SearchJob={
+  title:string,
+  location:string
+}

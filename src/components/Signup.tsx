@@ -16,7 +16,6 @@ export const Signup=()=>{
   const {dispatch}=useContext(AuthContext)
 
 
-
   const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
     const {name,value}=e.target
     setNewUser((user)=>{
@@ -25,6 +24,7 @@ export const Signup=()=>{
   }
   const handleSubmit=(e:any)=>{
    e.preventDefault()
+   setValidated(true)
    createUserWithEmailAndPassword(auth,newUser.email,newUser.password)
    .then(()=>{
       updateProfile(auth.currentUser!,{
@@ -48,7 +48,7 @@ export const Signup=()=>{
     })
   }
   return(
-    <Container>
+    <Container className="container">
       {signup && <Navigate to="/signin"/>}
       <Form onSubmit={handleSubmit} validated={validated} style={{maxWidth:"500px"}} className="form">
         <h2 className="mb-4">Sign up</h2>
