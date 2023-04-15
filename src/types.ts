@@ -36,9 +36,7 @@ export type Location={
 }
 
 export type File={
-  name:string,
-  size:string,
-  type:string
+  name:string
 }
 export type SavedJob={
   title:string,
