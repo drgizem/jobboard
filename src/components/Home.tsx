@@ -1,38 +1,22 @@
 import "../styles/Home.sass"
-import ComputerIcon from '@mui/icons-material/Computer';
-import LocalAirportIcon from '@mui/icons-material/LocalAirport';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
-import ScienceIcon from '@mui/icons-material/Science';
-import DesignServicesIcon from '@mui/icons-material/DesignServices';
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import SchoolIcon from '@mui/icons-material/School';
-import StoreIcon from '@mui/icons-material/Store';
-import BoltIcon from '@mui/icons-material/Bolt';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import { Navigate } from "react-router-dom";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import {useContext, useState,useEffect} from "react"
 import { AuthContext } from '../AuthContext';
-import {Container,Row,Col,Form,Button,Stack,Card} from "react-bootstrap"
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import BlockIcon from '@mui/icons-material/Block';
-import {Job,Filter, SearchJob} from "../types"
+import {Container,Row,Form,Button,Stack} from "react-bootstrap"
+import {Job,Filter} from "../types"
+import { SearchJob } from "../AuthContext";
 import uuid from "react-uuid";
 import { setDoc,getDoc,doc, updateDoc } from "firebase/firestore";
 import {db,auth} from "../firebase"
-
-export const category=[{label:"Accounting & Finance Jobs",icon:<AttachMoneyIcon/>},{label:"Sales Jobs",icon:<AttachMoneyIcon/>},{label:"IT Jobs",icon:<ComputerIcon/>},{label:"Engineering Jobs",icon:<ComputerIcon/>},
-{label:"Customer Services Jobs",icon:<PersonAddAltIcon/>},{label:"HR & Recruitment Jobs",icon:<PersonAddAltIcon/>},{label:"Trade & Construction Jobs",icon:<PersonAddAltIcon/>},
-{label:"Advertising & Marketing Jobs",icon:<PersonAddAltIcon/>},{label:"Logistics & Warehouse Jobs",icon:<DirectionsBusIcon/>},{label:"Energy, Oil & Gas Jobs",icon:<BoltIcon/>},
-{label:"Healthcare & Nursing Jobs",icon:<StoreIcon/>},{label:"Hospitality & Catering Jobs",icon:<StorefrontIcon/>},{label:"Teaching Jobs",icon:<SchoolIcon/>},{label:"Creative & Design Jobs",icon:<DesignServicesIcon/>},{label:"Scientific & QA Jobs",icon:<ScienceIcon/>}
-,{label:"Travel Jobs",icon:<LocalAirportIcon/>},{label:"Domestic help & Cleaning Jobs",icon:<CleaningServicesIcon/>}]
+import { currentDate} from "../info";
+import { JobCard } from "./JobCard";
+import { FilterPart } from "./Filter";
 
 export const Home=()=>{
 const [list,setList]=useState<Job[]>([])
+const {state,dispatch}=useContext(AuthContext)
 const [job,setJob]=useState<SearchJob>({} as SearchJob)
 const [page,setPage]=useState<number>(1)
 const [signin,setSignin]=useState<boolean>(false)
@@ -41,19 +25,11 @@ const [filter,setFilter]=useState<Filter>({
   posted:"",
   employ:""
 })
-const {state}=useContext(AuthContext)
 const [search,setSearch]=useState<boolean>(false)
 
-const date = new Date();
-let day = date.getDate();
-let monthsStr=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
-let month = monthsStr[date.getMonth()];
-let currentDate=`${month} ${day}`
-
-const title_url=`https://api.adzuna.com/v1/api/jobs/us/search/${page}?app_id=f56bbe74&app_key=b8dde6bfd2f9c162d16ae945cafec698&results_per_page=9&title_only=${job.title}&where=${job.location}${filter.posted}${filter.salary}${filter.employ}`
 useEffect(()=>{
   const fetchApi= async ()=>{
-    const res=await fetch(title_url,
+    const res=await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/${page}?app_id=f56bbe74&app_key=b8dde6bfd2f9c162d16ae945cafec698&results_per_page=9&title_only=${job.title}&where=${job.location}${filter.posted}${filter.salary}${filter.employ}`,
       {
         method:"GET"
       });
@@ -105,7 +81,11 @@ const handleClick=async(job:SearchJob)=>{
   setDoc(userRef,{...dbList,search:newSearchJobs})
 
   setSearch(true)
+  dispatch({
+      type:"search",payload:job
+    })
 }
+
 const onSave=async(id:string)=>{
   state.userInfo.email ==="" && setSignin(true)
   const favJob=list.find(item=>item.id===id)
@@ -127,8 +107,10 @@ const onSave=async(id:string)=>{
   } else{
     updateDoc(userRef,{...dbList})
   }
- 
+  
 }
+console.log(state.job)
+console.log(list)
   return (
     <Container >
      {signin && <Navigate to="/signin"/>}
@@ -136,11 +118,11 @@ const onSave=async(id:string)=>{
       <Stack direction="horizontal" gap={5}>
       <Form.Group className="mb-3" controlId="formBasicEmail">
       <Form.Label>What </Form.Label>
-      <Form.Control className="me-auto" type="text" placeholder="Job title" name="title" value={job.title || ""} onChange={handleChange}/>
+      <Form.Control className="me-auto" type="text" placeholder="Job title" name="title" value={job.title || state.job.title} onChange={handleChange}/>
     </Form.Group>
     <Form.Group className="mb-3" controlId="formBasicPassword">
       <Form.Label>Where</Form.Label>
-      <Form.Control className="me-auto" type="text" placeholder="United States" name="location" value={job.location || ""} onChange={handleChange}/>
+      <Form.Control className="me-auto" type="text" placeholder="United States" name="location" value={job.location || state.job.location} onChange={handleChange}/>
     </Form.Group>
     <Button variant="success" onClick={()=>handleClick(job)}>
       Search
@@ -152,86 +134,22 @@ const onSave=async(id:string)=>{
         list.length===0 ? 
         <>
     <Row className="mb-3">
-      <Col>
-      <Form.Select aria-label="Default select example" name="posted" onChange={handleDetail} value={filter.posted}>
-    <option value="">Date posted</option>
-    <option value="&max_days_old=5" >Last 5 days</option>
-    <option value="&max_days_old=10" >Last 10 days</option>
-    <option value="&max_days_old=30" >Last 30 days</option>
-  </Form.Select></Col>
-      <Col>
-      <Form.Select aria-label="Default select example" name="salary" onChange={handleDetail} value={filter.salary}>
-    <option value="">Salary estimate</option>
-    <option value="&salary_min=30000">$30,000+</option>
-    <option value="&salary_min=50000">$50,000+</option>
-    <option value="&salary_min=70000">$70,000+</option>
-  </Form.Select></Col>
-      <Col>
-      <Form.Select aria-label="Default select example" name="employ" onChange={handleDetail} value={filter.employ}>
-    <option value="">Employment type</option>
-    <option value="&full_time=1">Full-time</option>
-    <option value="&part_time=1">Part-time</option>
-    <option value="&contract=1">Contract</option>
-  </Form.Select></Col>
+      <FilterPart handleDetail={handleDetail} filter={filter}/>
   </Row>
   <div className="no_found mt-5">*No found jobs, try again</div> </>
    : <><Row className="mb-3">
-   <Col>
-   <Form.Select aria-label="Default select example" name="posted" onChange={handleDetail} value={filter.posted}>
- <option value="">Date posted</option>
- <option value="&max_days_old=5" >Last 5 days</option>
- <option value="&max_days_old=10" >Last 10 days</option>
- <option value="&max_days_old=30" >Last 30 days</option>
-</Form.Select></Col>
-   <Col>
-   <Form.Select aria-label="Default select example" name="salary" onChange={handleDetail} value={filter.salary}>
- <option value="">Salary estimate</option>
- <option value="&salary_min=30000">$30,000+</option>
- <option value="&salary_min=50000">$50,000+</option>
- <option value="&salary_min=70000">$70,000+</option>
-</Form.Select></Col>
-   <Col>
-   <Form.Select aria-label="Default select example" name="employ" onChange={handleDetail} value={filter.employ}>
- <option value="">Employment type</option>
- <option value="&full_time=1">Full-time</option>
- <option value="&part_time=1">Part-time</option>
- <option value="&contract=1">Contract</option>
-</Form.Select></Col>
+   <FilterPart handleDetail={handleDetail} filter={filter}/>
 </Row>
    <Row className="jobs">
-        {list.map((job:Job,key:number)=>{
-          return (
-            <Card key={job.id}>
-            <Card.Body>
-              <Row>
-                <Col xs={1} >
-                <div>{category.filter((item)=>{
-               return item.label===list[0].category.label})[0].icon}</div></Col>
-                <Col>
-                <Card.Title>{job.title}</Card.Title>
-              <Card.Subtitle className="mb-2 text-muted">{job.company.display_name}</Card.Subtitle></Col>
-              </Row>
-              <Row>
-              <div className="post_date">Posted on {monthsStr[Number(job.created.slice(5,7))-1]} {job.created.slice(8,10)}</div>
-              <Col xs={3}>
-              {job.salary_min && <Card.Text className="salary">
-                From {job.salary_min}$ a year
-              </Card.Text>}</Col>
-              <Card.Text className="description">
-                {job.description}
-              </Card.Text>
-              </Row>
-              <Row className="mt-2">
-                <div className="buttons">
-              <Button variant="success">Apply</Button>
-              <div className="icons">
-              <Card.Link ><FavoriteBorderIcon className="hearticon" onClick={()=>onSave(job.id)}/></Card.Link>
-              <Card.Link href="#" className="m-0" ><BlockIcon onClick={()=>deleteJob(job.id)} className="text-success"/></Card.Link>
-              </div>   
-              </div></Row>
-            </Card.Body>
-          </Card>
-          )    
+    {list.map((job:Job,key:number)=>{
+      return (<>
+        <JobCard
+          key={job.id}
+          job={job}
+          onSave={onSave}
+          deleteJob={deleteJob}
+          />
+          </> )    
     })}
     </Row></>
     : list.length ===0 && <div className="scroll-container"><p className="scroll-text">Find your job, let's go!</p></div>}

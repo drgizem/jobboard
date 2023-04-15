@@ -31,9 +31,14 @@
 .no_found
   max-width: 400px
   font-size: 20px
-
-.hearticon
-  cursor: pointer
-  color: rgb(120, 186, 59)
-  &:hover
+.icons
+  display: flex
+  flex-direction: row
+  gap: 3px
+  .hearticon
+    cursor: pointer
+    color: rgb(120, 186, 59)
+    &:hover
+      color: red
+  .hearticon_clicked
     color: red

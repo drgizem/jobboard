@@ -2,9 +2,10 @@ import {Container,Card,Button} from "react-bootstrap"
 import "../styles/Savedjobs.sass"
 import React, { useEffect, useState } from "react"
 import BlockIcon from '@mui/icons-material/Block';
-import { SavedJob } from "../AuthContext";
+import { SavedJob } from "../types";
 import { setDoc,getDoc,doc, onSnapshot } from "firebase/firestore";
 import {db,auth} from "../firebase"
+
 
 export const Saved=()=>{
   const [saveList,setSaveList]=useState<SavedJob[]>([])
@@ -27,9 +28,9 @@ export const Saved=()=>{
     setDoc(userRef,{...dbList,savedJobs:job})
 
   }
-
+ 
   return(<>
-    <Container className="mt-5 container">
+    <Container className="mt-5 container" >
       <h1>My jobs</h1>
       <hr></hr>
       {saveList.length===0 && <div>There are no saved jobs</div>}

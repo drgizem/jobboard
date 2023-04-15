@@ -36,7 +36,7 @@ export const Navbarmodal=()=>{
                  <Person2Icon/>
                </Dropdown.Toggle>
                 <Dropdown.Menu >
-                <Dropdown.Item className="dropdown_text">{state.userInfo.email}</Dropdown.Item>
+                <Dropdown.Item className="dropdown_text email">{state.userInfo.email}</Dropdown.Item>
                  <Link to="/profile" className="dropdown_saved"><AssignmentIndIcon className="text-secondary"/>Profile</Link><br></br>
                  <Link to="/recentsearch" className="dropdown_saved"><SearchIcon/>Recent Searches</Link><br></br>
                  <Link to="/savedjobs" className="dropdown_saved"><FavoriteIcon className="text-success"/> Saved jobs</Link>

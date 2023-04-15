@@ -1,7 +1,7 @@
 import {useState,useEffect } from "react"
 import "../styles/Search.sass"
 import { Container,Card } from "react-bootstrap"
-import {Search} from "../AuthContext"
+import {Search} from "../types"
 import ClearIcon from '@mui/icons-material/Clear';
 import { setDoc,getDoc,doc, onSnapshot } from "firebase/firestore";
 import {db,auth} from "../firebase"

@@ -57,7 +57,7 @@ export const Signup=()=>{
     navigate("/"))
   }
   return(
-    <Container className="container">
+    <Container>
       <Form onSubmit={handleSubmit} validated={validated} style={{maxWidth:"500px"}} className="form">
         <h2 className="mb-4">Sign up</h2>
       <Form.Group className="mb-3">
@@ -77,7 +77,7 @@ export const Signup=()=>{
       </Button>
      </Form>
      <h5 className="mt-4 signup">or Sign up with </h5>
-        <Card className="mt-4">
+        <Card className="mt-4" style={{marginLeft:"25%"}}>
           <Card.Body className="d-flex" onClick={handleGoogle}><img className="img" src={google} alt=""/>Continue with Google</Card.Body>
         </Card>
     </Container>

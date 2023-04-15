@@ -34,7 +34,22 @@ export type Location={
   display_name:string,
   area:Array<string>
 }
-export type SearchJob={
+
+export type File={
+  name:string,
+  size:string,
+  type:string
+}
+export type SavedJob={
   title:string,
-  location:string
+  company:Company,
+  location:string,
+  id:string,
+  savedDate:string,
+}
+export type Search={
+  title:string,
+  location:string,
+  id:string,
+  searchDate:string
 }
