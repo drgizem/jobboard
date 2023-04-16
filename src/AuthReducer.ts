@@ -1,9 +1,12 @@
-import { InitialStateType, SearchJob, UserInfo } from "./AuthContext"
+import { File, InitialStateType, SearchJob, UserInfo } from "./AuthContext"
 
 
 type ContextAction=
  | {type:"login" | "logout" ;payload:UserInfo}
  | {type:"search"; payload:SearchJob}
+ | {type:"resume_add" | "resume_delete" ; payload:File}
+ | {type:"upload_page" ; payload:File[]}
+
 
 
 export const AuthReducer=(state:InitialStateType,action:ContextAction)=>{
@@ -14,6 +17,12 @@ export const AuthReducer=(state:InitialStateType,action:ContextAction)=>{
         return {...state,userInfo:{email:"",uid:"",photoURL:"",displayName:""},isLogin:false}
       case "search":
         return {...state,job:{title:action.payload.title,location:action.payload.location}}
+       case "resume_add":
+        return {...state,list:[...state.list,action.payload]} 
+       case "resume_delete":
+        return {...state,list:state.list.filter((item)=>item.name !==action.payload.name)} 
+      case "upload_page":
+        return {...state,list:action.payload}
         default:
           return state
   }

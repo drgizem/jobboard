@@ -26,6 +26,7 @@ const [filter,setFilter]=useState<Filter>({
   employ:""
 })
 const [search,setSearch]=useState<boolean>(false)
+const [resume,setResume]=useState<boolean>(false)
 
 useEffect(()=>{
   const fetchApi= async ()=>{
@@ -107,13 +108,16 @@ const onSave=async(id:string)=>{
   } else{
     updateDoc(userRef,{...dbList})
   }
-  
 }
-console.log(state.job)
-console.log(list)
+const onApply=(id:string)=>{
+  if(state.list.length===0){
+    setResume(true)
+  }
+}
   return (
     <Container >
      {signin && <Navigate to="/signin"/>}
+     {resume && <Navigate to="/profile"/>}
     <Row className="mt-5">
       <Stack direction="horizontal" gap={5}>
       <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -148,6 +152,7 @@ console.log(list)
           job={job}
           onSave={onSave}
           deleteJob={deleteJob}
+          onApply={onApply}
           />
           </> )    
     })}

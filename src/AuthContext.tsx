@@ -5,7 +5,8 @@ import { AuthReducer } from "./AuthReducer"
 export type InitialStateType={
   userInfo:UserInfo,
   isLogin:boolean,
-  job:SearchJob
+  job:SearchJob,
+  list:File[]
 }
 export type SearchJob={
   title:string,
@@ -17,11 +18,16 @@ export type UserInfo={
   displayName:string,
   photoURL:string
 }
+export type File={
+  name:string,
+  id:string
+}
 
 export const INITIAL_STATE:InitialStateType={
   userInfo:JSON.parse(localStorage.getItem("user") ||"") || {},
   isLogin:false,
-  job:{title:"",location:""}
+  job:{title:"",location:""},
+  list:[]
 }
 
 export const AuthContext = createContext<{

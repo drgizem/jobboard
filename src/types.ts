@@ -1,3 +1,5 @@
+
+
 export type UserData={
   email:"",
   password:""
@@ -35,9 +37,7 @@ export type Location={
   area:Array<string>
 }
 
-export type File={
-  name:string
-}
+
 export type SavedJob={
   title:string,
   company:Company,

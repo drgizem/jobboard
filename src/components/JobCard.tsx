@@ -1,21 +1,25 @@
-import { Card,Row,Col,Button,Form } from "react-bootstrap"
+import { Card,Row,Col,Button,Form,Modal } from "react-bootstrap"
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BlockIcon from '@mui/icons-material/Block';
 import { monthsStr } from "../info";
 import { category } from "../category";
 import { Job } from "../types";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { setDoc,getDoc,doc } from "firebase/firestore";
 import {db,auth} from "../firebase"
+import { AuthContext } from "../AuthContext";
 
 type Props={
 job:Job,
 onSave(id:string):void
 deleteJob(id:string):void
+onApply(id:string):void
 }
-export const JobCard=({job,onSave,deleteJob}:Props)=>{
+export const JobCard=({job,onSave,deleteJob,onApply}:Props)=>{
   const [isChecked,setIsChecked]=useState<boolean>(false)
+  const [isApplied,setIsApplied]=useState<boolean>(false)
+  const {state}=useContext(AuthContext)
 
   const handleClick=()=>{
     setIsChecked(true)
@@ -29,7 +33,11 @@ export const JobCard=({job,onSave,deleteJob}:Props)=>{
     setDoc(userRef,{...dbList,savedJobs:job})
     setIsChecked(false)
   }
-  return (
+  const handleApply=()=>{
+    onApply(job.id)
+    setIsApplied(true)
+  }
+  return (<>
           <Card>
             <Card.Body>
               <Row>
@@ -52,7 +60,7 @@ export const JobCard=({job,onSave,deleteJob}:Props)=>{
               </Row>
               <Row className="mt-2">
                 <div className="buttons">
-              <Button variant="success">Apply</Button>
+              <Button variant="success" onClick={handleApply}>Apply</Button>
               <div className="icons">
               <Form.Check type="checkbox" >{isChecked ? <FavoriteIcon className="hearticon_clicked" onClick={()=>deleteSave(job.id)} />: <FavoriteBorderIcon className="hearticon" onClick={handleClick}/>}</Form.Check>
               <Card.Link href="#" className="m-0" ><BlockIcon onClick={()=>deleteJob(job.id)} className="text-success"/></Card.Link>
@@ -60,5 +68,24 @@ export const JobCard=({job,onSave,deleteJob}:Props)=>{
               </div></Row>
             </Card.Body>
           </Card>
-  )
+          {isApplied &&
+            ( <div
+           className="modal show"
+           style={{ display: 'block', position: 'initial' }}
+         >
+           <Modal.Dialog>
+             <Modal.Header closeButton>
+               <Modal.Title>Modal title</Modal.Title>
+             </Modal.Header>
+     
+             <Modal.Body>
+              <p>Do you want to apply with {state.list[state.list.length-1].name} you uploaded?</p>
+             </Modal.Body>
+             <Modal.Footer>
+               <Button variant="secondary">Close</Button>
+               <Button variant="primary">Save changes</Button>
+             </Modal.Footer>
+           </Modal.Dialog>
+         </div>)}
+  </>)
 }
