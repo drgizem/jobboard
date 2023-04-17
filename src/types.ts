@@ -37,10 +37,9 @@ export type Location={
   area:Array<string>
 }
 
-
 export type SavedJob={
   title:string,
-  company:Company,
+  company:{display_name:string},
   location:string,
   id:string,
   savedDate:string,
@@ -50,4 +49,11 @@ export type Search={
   location:string,
   id:string,
   searchDate:string
+}
+export type AppliedJob={
+  title:string,
+  company:string,
+  location:string,
+  id:string,
+  savedDate:string,
 }

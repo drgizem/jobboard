@@ -13,12 +13,12 @@ export const Profile=()=>{
  const [url,setUrl]=useState<string[]>([])
  const [upload,setUpload]=useState<boolean>(true)
 
- const fileListRef = ref(storage, `${auth.currentUser!.uid}/`)
+ const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
   const handleSubmit=(e:any)=>{
     e.preventDefault()
     if(!userFile) return
    
-    const storageRef=ref(storage,`/${auth.currentUser!.uid}/${userFile.name}`)
+    const storageRef=ref(storage,`/${state.userInfo!.uid}/${userFile.name}`)
     uploadBytesResumable(storageRef,userFile).then((snapshot)=>{
       getDownloadURL(snapshot.ref).then((url) => {
         setUrl((prev) => [...prev, url]);
@@ -44,10 +44,9 @@ export const Profile=()=>{
         })
       })
     })
-
   },[])
   const handleDelete=(name:string)=>{
-    const deleteRef=ref(storage,`${auth.currentUser!.uid}/${name}`)
+    const deleteRef=ref(storage,`${state.userInfo!.uid}/${name}`)
     const newFile=state.list.find(item=>item.name ===name)
     deleteObject(deleteRef).then(()=>{
       dispatch({
@@ -55,7 +54,7 @@ export const Profile=()=>{
       })
     })
   }
-console.log(state)
+
   return(
     <Container className="mt-5">
       <h2>{state.userInfo.displayName}</h2>

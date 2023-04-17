@@ -10,6 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import {auth} from "../firebase"
 import { signOut } from "firebase/auth"
+import DoneIcon from '@mui/icons-material/Done';
 
 
 export const Navbarmodal=()=>{
@@ -39,7 +40,8 @@ export const Navbarmodal=()=>{
                 <Dropdown.Item className="dropdown_text email">{state.userInfo.email}</Dropdown.Item>
                  <Link to="/profile" className="dropdown_saved"><AssignmentIndIcon className="text-secondary"/>Profile</Link><br></br>
                  <Link to="/recentsearch" className="dropdown_saved"><SearchIcon/>Recent Searches</Link><br></br>
-                 <Link to="/savedjobs" className="dropdown_saved"><FavoriteIcon className="text-success"/> Saved jobs</Link>
+                 <Link to="/savedjobs" className="dropdown_saved"><FavoriteIcon className="text-success"/> Saved jobs</Link><br></br>
+                 <Link to="/appliedjobs" className="dropdown_saved"><DoneIcon className="text-success"/> Applied jobs</Link>
                  <Dropdown.Item href="/" className="dropdown_text" onClick={onSignOut}>Sign out</Dropdown.Item>
                </Dropdown.Menu>
              </Dropdown>)  }

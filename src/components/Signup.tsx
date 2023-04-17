@@ -41,7 +41,8 @@ export const Signup=()=>{
    .then(()=>{
     setDoc(doc(db,"users",`${auth.currentUser!.uid}`),{
       savedJobs:[],
-      search:[]
+      search:[],
+      applied:[]
     })
   })
   .then(()=> navigate("/"))

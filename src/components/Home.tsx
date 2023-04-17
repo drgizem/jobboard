@@ -5,14 +5,15 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import {useContext, useState,useEffect} from "react"
 import { AuthContext } from '../AuthContext';
 import {Container,Row,Form,Button,Stack} from "react-bootstrap"
-import {Job,Filter} from "../types"
+import {Job,Filter,AppliedJob} from "../types"
 import { SearchJob } from "../AuthContext";
 import uuid from "react-uuid";
-import { setDoc,getDoc,doc, updateDoc } from "firebase/firestore";
-import {db,auth} from "../firebase"
+import { setDoc,getDoc,doc, updateDoc,onSnapshot } from "firebase/firestore";
+import {db,auth,storage} from "../firebase"
 import { currentDate} from "../info";
 import { JobCard } from "./JobCard";
 import { FilterPart } from "./Filter";
+import {ref, listAll} from "firebase/storage"
 
 export const Home=()=>{
 const [list,setList]=useState<Job[]>([])
@@ -26,7 +27,8 @@ const [filter,setFilter]=useState<Filter>({
   employ:""
 })
 const [search,setSearch]=useState<boolean>(false)
-const [resume,setResume]=useState<boolean>(false)
+
+
 
 useEffect(()=>{
   const fetchApi= async ()=>{
@@ -39,6 +41,16 @@ useEffect(()=>{
   }
   fetchApi()// eslint-disable-next-line
 },[filter,page])
+
+useEffect(()=>{
+  const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
+  listAll(fileListRef)
+      .then((response)=>{
+        dispatch({
+          type:"upload_page",payload:response.items
+        })
+      })
+},[])
 
 const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
   const {name,value}=e.target
@@ -99,7 +111,7 @@ const onSave=async(id:string)=>{
   const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
   const listRef=await getDoc(userRef)
   const dbList=listRef.data()
-  const newList={...dbList!}
+  const newList={...dbList}
   let oldJobIndex=newList.savedJobs.findIndex((job:any)=>job.id===favJob!.id)
 
   if(oldJobIndex === -1){
@@ -109,24 +121,39 @@ const onSave=async(id:string)=>{
     updateDoc(userRef,{...dbList})
   }
 }
-const onApply=(id:string)=>{
-  if(state.list.length===0){
-    setResume(true)
-  }
+const onApply=async(id:string)=>{
+  const applied=list.find((item)=>item.id===id)
+    const appliedJob={
+      title:applied!.title,
+      company:applied!.company.display_name,
+      location:applied!.location.display_name,
+      id:applied!.id,
+      savedDate:currentDate}
+      const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+      const listRef=await getDoc(userRef)
+      const dbList=listRef.data()
+      const newList={...dbList}
+      let oldJobIndex=newList.applied.findIndex((job:any)=>job.id===applied!.id)
+      if(oldJobIndex===-1){
+        const newAppliedJobs=[...dbList!.applied,appliedJob]
+        setDoc(userRef,{...dbList,applied:newAppliedJobs})
+      } else {
+        updateDoc(userRef,{...dbList})
+      }
 }
+
   return (
     <Container >
      {signin && <Navigate to="/signin"/>}
-     {resume && <Navigate to="/profile"/>}
     <Row className="mt-5">
       <Stack direction="horizontal" gap={5}>
       <Form.Group className="mb-3" controlId="formBasicEmail">
       <Form.Label>What </Form.Label>
-      <Form.Control className="me-auto" type="text" placeholder="Job title" name="title" value={job.title || state.job.title} onChange={handleChange}/>
+      <Form.Control className="me-auto" type="text" placeholder="Job title" name="title" value={job.title || ""} onChange={handleChange}/>
     </Form.Group>
     <Form.Group className="mb-3" controlId="formBasicPassword">
       <Form.Label>Where</Form.Label>
-      <Form.Control className="me-auto" type="text" placeholder="United States" name="location" value={job.location || state.job.location} onChange={handleChange}/>
+      <Form.Control className="me-auto" type="text" placeholder="United States" name="location" value={job.location || ""} onChange={handleChange}/>
     </Form.Group>
     <Button variant="success" onClick={()=>handleClick(job)}>
       Search
@@ -162,7 +189,7 @@ const onApply=(id:string)=>{
    (<div className="page">
    <ArrowBackIosIcon style={{visibility: page===1 ? "hidden" : "visible"}} onClick={onDecreasePage} />
    <p>{page}</p>
-   {list.length>page*9 && <ArrowForwardIosIcon onClick={onIncreasePage} />}</div>)} 
+   <ArrowForwardIosIcon onClick={onIncreasePage} /></div>)}
   </Container>
   )
 }

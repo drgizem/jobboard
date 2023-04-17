@@ -10,6 +10,7 @@ import { Saved } from './components/Saved';
 import {Searchjob} from "./components/Search"
 import { Profile } from './components/Profile';
 import {RequireAuth} from "./components/Require"
+import { Applied } from './components/Applied';
 
 
 
@@ -25,6 +26,7 @@ function App() {
       <Route path="/savedjobs" element={<RequireAuth><Saved/></RequireAuth>}/>
       <Route path="/recentsearch" element={<RequireAuth><Searchjob/></RequireAuth>}/>
       <Route path="/profile" element={<RequireAuth><Profile/></RequireAuth>}/>
+      <Route path="/appliedjobs" element={<RequireAuth><Applied/></RequireAuth>}/>
      </Routes>
     </div>
   )
