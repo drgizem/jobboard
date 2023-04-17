@@ -9,6 +9,7 @@ import { useContext, useState } from "react";
 import { setDoc,getDoc,doc } from "firebase/firestore";
 import {db,auth} from "../firebase"
 import { AuthContext } from "../AuthContext";
+import { Link } from "react-router-dom";
 
 type Props={
 job:Job,
@@ -74,16 +75,12 @@ export const JobCard=({job,onSave,deleteJob,onApply}:Props)=>{
            style={{ display: 'block', position: 'initial' }}
          >
            <Modal.Dialog>
-             <Modal.Header closeButton>
-               <Modal.Title>Modal title</Modal.Title>
-             </Modal.Header>
-     
              <Modal.Body>
-              <p>Do you want to apply with {state.list[state.list.length-1].name} you uploaded?</p>
+              <p>Do you want to apply with "{state.list[state.list.length-1].name}" you uploaded?</p>
              </Modal.Body>
              <Modal.Footer>
-               <Button variant="secondary">Close</Button>
-               <Button variant="primary">Save changes</Button>
+               <Button variant="success">Continue</Button>
+               <Link to="/profile"><Button variant="secondary">Change Resume</Button></Link>
              </Modal.Footer>
            </Modal.Dialog>
          </div>)}
