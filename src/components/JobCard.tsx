@@ -6,7 +6,7 @@ import { monthsStr } from "../info";
 import { category } from "../category";
 import { Job, AppliedJob } from "../types";
 import { useContext, useEffect, useState } from "react";
-import { setDoc,getDoc,doc,onSnapshot,updateDoc } from "firebase/firestore";
+import { setDoc,getDoc,doc,onSnapshot} from "firebase/firestore";
 import {db,auth} from "../firebase"
 import { AuthContext } from "../AuthContext";
 import { Link } from "react-router-dom";
@@ -28,15 +28,16 @@ export const JobCard=({job,onSave,deleteJob,onApply}:Props)=>{
   const [resume,setResume]=useState<boolean>(false)
   const [appliedList,setAppliedList]=useState<AppliedJob[]>([])
 
-  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+  
   useEffect(()=>{
+    const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
     const unSubscribe=onSnapshot(userRef,(doc)=>{
       const dbList=doc.data()
       const list=dbList!.applied
       setAppliedList(list)
     })
     return ()=>{
-      unSubscribe()
+      unSubscribe() // eslint-disable-next-line
     }
   },[])
   

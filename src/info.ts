@@ -15,7 +15,21 @@ export const labels=[
   "Creative & Design Jobs",
   "Scientific & QA Jobs",
   "Travel Jobs",
-  "Domestic help & Cleaning Jobs"
+  "Domestic help & Cleaning Jobs",
+  "PR, Advertising & Marketing Jobs",
+  "Admin Jobs",
+  "Legal Jobs",
+  "Graduate Jobs",
+  "Retail Jobs",
+  "Consultancy Jobs",
+  "Manufacturing Jobs",
+  "Social work Jobs",
+  "Property Jobs",
+  "Charity & Voluntary Jobs",
+  "Maintenance Jobs",
+  "Part time Jobs",
+  "Other/General Jobs",
+  "Unknown"
 ]
 
 const date = new Date();

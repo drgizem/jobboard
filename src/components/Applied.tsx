@@ -2,14 +2,15 @@ import { useState ,useEffect} from "react"
 import "../styles/Applied.sass"
 import { Container,Card } from "react-bootstrap"
 import {AppliedJob } from "../types"
-import { setDoc,getDoc,doc,onSnapshot } from "firebase/firestore";
+import { doc,onSnapshot } from "firebase/firestore";
 import {db,auth} from "../firebase"
 
 export const Applied=()=>{
   const [appliedList,setAppliedList]=useState<AppliedJob[]>([])
 
-  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+  
   useEffect(()=>{
+    const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
     const unSubscribe=onSnapshot(userRef,(doc)=>{
       const dbList=doc.data()
       const list=dbList!.applied
@@ -33,9 +34,7 @@ export const Applied=()=>{
           <Card.Text>Applied on {job.savedDate}</Card.Text>
         </Card.Body>
         </Card>)
-      })}
-      
+      })} 
     </Container>
-
   )
 }

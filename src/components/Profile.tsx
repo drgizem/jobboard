@@ -2,7 +2,7 @@ import {Container,Form,Card, Button} from "react-bootstrap"
 import "../styles/Profile.sass"
 import React, { useContext,useState,useEffect } from "react"
 import { AuthContext } from "../AuthContext"
-import { storage,auth } from "../firebase";
+import { storage} from "../firebase";
 import {ref, uploadBytesResumable,getDownloadURL,listAll,deleteObject} from "firebase/storage"
 import ClearIcon from '@mui/icons-material/Clear';
 
@@ -12,12 +12,13 @@ export const Profile=()=>{
  const [userFile,setUserFile]=useState<File>({} as File)
  const [url,setUrl]=useState<string[]>([])
  const [upload,setUpload]=useState<boolean>(true)
+ const [validated,setValidated]=useState<boolean>(false)
 
  const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
+
   const handleSubmit=(e:any)=>{
     e.preventDefault()
-    if(!userFile) return
-   
+    setValidated(true)
     const storageRef=ref(storage,`/${state.userInfo!.uid}/${userFile.name}`)
     uploadBytesResumable(storageRef,userFile).then((snapshot)=>{
       getDownloadURL(snapshot.ref).then((url) => {
@@ -43,6 +44,7 @@ export const Profile=()=>{
           })
         })
       })
+      state.list.length===0 && setUpload(false)
     })
   },[])
   const handleDelete=(name:string)=>{
@@ -54,22 +56,23 @@ export const Profile=()=>{
       })
     })
   }
-
+console.log(upload)
   return(
     <Container className="mt-5">
       <h2>{state.userInfo.displayName}</h2>
       <p>{state.userInfo.email}</p>
-      <Form onSubmit={handleSubmit}>
+      <Form validated={validated} onSubmit={handleSubmit}>
         <Form.Label>Your Resume</Form.Label>
-      <Form.Control type="file" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
+      <Form.Control required type="file" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
         setUserFile(e.target.files![0])}}/>
       <Button variant="success" className="mt-3" type="submit">Upload</Button>
       </Form>
-      {upload && state.list.map((file)=>{
+      {state.list.map((file)=>{
       return <Card className="mt-4 profile_card">
         <Card.Body><a href={url[state.list.findIndex((item)=>item===file)]}>{file.name}</a></Card.Body>
         <ClearIcon onClick={()=>handleDelete(file.name)}/>
         </Card>})}
+        {!upload && <div className="text-danger mt-3">*No uploaded resume</div>}
     </Container>
   )
 }

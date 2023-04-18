@@ -5,10 +5,10 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import {useContext, useState,useEffect} from "react"
 import { AuthContext } from '../AuthContext';
 import {Container,Row,Form,Button,Stack} from "react-bootstrap"
-import {Job,Filter,AppliedJob} from "../types"
+import {Job,Filter} from "../types"
 import { SearchJob } from "../AuthContext";
 import uuid from "react-uuid";
-import { setDoc,getDoc,doc, updateDoc,onSnapshot } from "firebase/firestore";
+import { setDoc,getDoc,doc, updateDoc } from "firebase/firestore";
 import {db,auth,storage} from "../firebase"
 import { currentDate} from "../info";
 import { JobCard } from "./JobCard";
@@ -27,8 +27,6 @@ const [filter,setFilter]=useState<Filter>({
   employ:""
 })
 const [search,setSearch]=useState<boolean>(false)
-
-
 
 useEffect(()=>{
   const fetchApi= async ()=>{
@@ -49,7 +47,7 @@ useEffect(()=>{
         dispatch({
           type:"upload_page",payload:response.items
         })
-      })
+      })// eslint-disable-next-line
 },[])
 
 const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
@@ -108,7 +106,7 @@ const onSave=async(id:string)=>{
     location:favJob!.location.display_name,
     id:favJob!.id,
     savedDate:currentDate}
-  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+  const userRef=doc(db,"users",`${auth.currentUser!.uid}`) //!!!!
   const listRef=await getDoc(userRef)
   const dbList=listRef.data()
   const newList={...dbList}
@@ -129,17 +127,17 @@ const onApply=async(id:string)=>{
       location:applied!.location.display_name,
       id:applied!.id,
       savedDate:currentDate}
-      const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
-      const listRef=await getDoc(userRef)
-      const dbList=listRef.data()
-      const newList={...dbList}
-      let oldJobIndex=newList.applied.findIndex((job:any)=>job.id===applied!.id)
-      if(oldJobIndex===-1){
-        const newAppliedJobs=[...dbList!.applied,appliedJob]
-        setDoc(userRef,{...dbList,applied:newAppliedJobs})
-      } else {
-        updateDoc(userRef,{...dbList})
-      }
+    const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+    const listRef=await getDoc(userRef)
+    const dbList=listRef.data()
+    const newList={...dbList}
+    let oldJobIndex=newList.applied.findIndex((job:any)=>job.id===applied!.id)
+    if(oldJobIndex===-1){
+      const newAppliedJobs=[...dbList!.applied,appliedJob]
+      setDoc(userRef,{...dbList,applied:newAppliedJobs})
+    } else {
+      updateDoc(userRef,{...dbList})
+    }
 }
 
   return (
@@ -189,7 +187,7 @@ const onApply=async(id:string)=>{
    (<div className="page">
    <ArrowBackIosIcon style={{visibility: page===1 ? "hidden" : "visible"}} onClick={onDecreasePage} />
    <p>{page}</p>
-   <ArrowForwardIosIcon onClick={onIncreasePage} /></div>)}
+   <ArrowForwardIosIcon style={{visibility: list.length<9 ? "hidden" : "visible"}}  onClick={onIncreasePage} /></div>)}
   </Container>
   )
 }
