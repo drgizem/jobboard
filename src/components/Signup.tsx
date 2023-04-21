@@ -16,6 +16,7 @@ export const Signup=()=>{
   const [validated, setValidated] = useState(false);
   const {dispatch}=useContext(AuthContext)
   const navigate= useNavigate()
+  const [error,setError]=useState<boolean>(false)
 
 
   const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
@@ -46,9 +47,10 @@ export const Signup=()=>{
     })
   })
   .then(()=> navigate("/"))
-   .catch((error)=>{
-      console.log(error.message)
-   })
+  .catch((error)=>{
+    console.log(error.message)
+    error.message.includes("weak-password") && setError(true)
+  })
    
   }
   const handleGoogle=()=>{
@@ -71,7 +73,8 @@ export const Signup=()=>{
       </Form.Group>
       <Form.Group className="mb-3" >
         <Form.Label>Password</Form.Label>
-        <Form.Control required  onChange={handleChange} value={newUser.password || ""} name="password" type="password" placeholder="Password" />
+        <Form.Control required style={error ? {borderColor:"red", backgroundImage:"none"} : {borderColor:"#ced4da"}} onChange={handleChange} value={newUser.password || ""} name="password" type="password" placeholder="Password" />
+        {error && <Form.Text className="mb-3 text-danger">Password should be at least 6 characters!</Form.Text>}
       </Form.Group>
       <Button variant="success" type="submit">
         Submit

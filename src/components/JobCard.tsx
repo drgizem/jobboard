@@ -2,9 +2,9 @@ import { Card,Row,Col,Button,Form,Modal,Alert } from "react-bootstrap"
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BlockIcon from '@mui/icons-material/Block';
-import { monthsStr } from "../info";
+import { currentDate, monthsStr } from "../info";
 import { category } from "../category";
-import { Job, AppliedJob } from "../types";
+import { Job, AppliedJob, SavedJob } from "../types";
 import { useContext, useEffect, useState } from "react";
 import { setDoc,getDoc,doc,onSnapshot} from "firebase/firestore";
 import {db,auth} from "../firebase"
@@ -17,61 +17,97 @@ job:Job,
 onSave(id:string):void
 deleteJob(id:string):void
 onApply(id:string):void
+deleteSavedJob(id:string):void
 }
-export const JobCard=({job,onSave,deleteJob,onApply}:Props)=>{
-  const [isChecked,setIsChecked]=useState<boolean>(false)
+export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob}:Props)=>{
   const [isApplied,setIsApplied]=useState<boolean>(false)
-  const [success,setSuccess]=useState<boolean>(false)
   const [show,setShow]=useState<boolean>(true)
-  const {state}=useContext(AuthContext)
-  const [error,setError]=useState<boolean>(false)
+  const {state,dispatch}=useContext(AuthContext)
   const [resume,setResume]=useState<boolean>(false)
+  const [signin,setSignin]=useState<boolean>(false)
   const [appliedList,setAppliedList]=useState<AppliedJob[]>([])
-
+  const [error,setError]=useState<boolean>(false)
+  const [success,setSuccess]=useState<boolean>(false)
+  const [save,setSave]=useState<Job>({
+  title:"",
+  category:{
+    label:""
+  },
+  company:{
+    display_name:""
+  },
+  location:{
+    display_name:""
+  },
+  salary_min:0,
+  created:"",
+  description:"",
+  id:"",
+  savedDate:"",
+  isSaved:false
+  })
+ 
+   
+useEffect(()=>{
+  const findSaved=async(save:Job)=>{
+    const userRef=doc(db,"users",`${state.userInfo!.uid}`) 
+    const listRef=await getDoc(userRef)
+    const dbList=listRef.data()
+     const saved=dbList!.find((item:any)=>item.id===save.id)
+     if(saved){
+      const newSaved={...saved,isSaved:true}
+      return setSave(newSaved)
+     }else {
+      return setSave((pre)=>{
+        return {...pre}
+      })
+     }
+  }
+  findSaved(save)
+},[])
   
+
+ 
   useEffect(()=>{
-    const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
-    const unSubscribe=onSnapshot(userRef,(doc)=>{
+    if(state.userInfo.email !==""){
+      const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+      const unSubscribe=onSnapshot(userRef,(doc)=>{
       const dbList=doc.data()
       const list=dbList!.applied
       setAppliedList(list)
-    })
-    return ()=>{
-      unSubscribe() // eslint-disable-next-line
+      })
     }
-  },[])
+  },[state.userInfo])
   
-  
-  const handleClick=()=>{
-    setIsChecked(true)
+  const handleClick=(job:Job)=>{
+    setSave({...job,isSaved:true})
     onSave(job.id)
   }
-  const deleteSave=async(id:string)=>{
-    const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
-    const listRef=await getDoc(userRef)
-    const dbList=listRef.data()
-    const job=dbList!.savedJobs.filter((item:any)=>item.id!==id)
-    setDoc(userRef,{...dbList,savedJobs:job})
-    setIsChecked(false)
+  const deleteSave=(job:Job)=>{
+    setSave({...job,isSaved:false})
+    deleteSavedJob(job.id) 
   }
   const handleApply=()=>{
-    if(state.list.length ===0){
-      setResume(true)
+    if(state.userInfo.email !==""){
+      if(state.list.length ===0){
+        setResume(true)
+      } else {
+        setIsApplied(true)
+      }
     } else {
-      setIsApplied(true)
-    }
+      setSignin(true)
+    } 
   }
   const handleContinue=async(id:string)=>{
     setIsApplied(false)
     onApply(job.id)
-    if(appliedList[appliedList.length-1].id===id){
-      setError(true)
-    } else { 
-      setSuccess(true)}
+    const jobAgain=appliedList.find(item=>item.id===id)
+    jobAgain ? setError(true) : setSuccess(true)
   }
-  console.log(appliedList)
+
   return (<>
    {resume && <Navigate to="/profile"/>}
+   {signin && <Navigate to="/signin"/>}
           <Card>
             <Card.Body>
               <Row>
@@ -96,7 +132,7 @@ export const JobCard=({job,onSave,deleteJob,onApply}:Props)=>{
                 <div className="buttons">
               <Button variant="success" onClick={handleApply}>Apply</Button>
               <div className="icons">
-              <Form.Check type="checkbox" >{isChecked ? <FavoriteIcon className="hearticon_clicked" onClick={()=>deleteSave(job.id)} />: <FavoriteBorderIcon className="hearticon" onClick={handleClick}/>}</Form.Check>
+              <Form.Check type="checkbox" >{save.isSaved ? <FavoriteIcon className="hearticon_clicked" onClick={()=>deleteSave(job)} />: <FavoriteBorderIcon className="hearticon" onClick={()=>handleClick(job)}/>}</Form.Check>
               <Card.Link href="#" className="m-0" ><BlockIcon onClick={()=>deleteJob(job.id)} className="text-success"/></Card.Link>
               </div>   
               </div></Row>

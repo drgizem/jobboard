@@ -4,7 +4,6 @@ export type UserData={
   email:"",
   password:""
 }
-
 export type NewUser={
   name:"",
   email:"",
@@ -24,7 +23,8 @@ export type Job={
   created:string,
   description:string,
   id:string,
-  savedDate:string
+  savedDate:string,
+  isSaved:boolean
 }
 export type Company={
   display_name:string
@@ -34,7 +34,6 @@ export type Category={
 }
 export type Location={
   display_name:string,
-  area:Array<string>
 }
 
 export type SavedJob={

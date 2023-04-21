@@ -56,7 +56,7 @@ export const Profile=()=>{
       })
     })
   }
-console.log(upload)
+
   return(
     <Container className="mt-5">
       <h2>{state.userInfo.displayName}</h2>

@@ -50,6 +50,7 @@ useEffect(()=>{
       })// eslint-disable-next-line
 },[])
 
+
 const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
   const {name,value}=e.target
   setJob((preJob)=>{
@@ -72,6 +73,7 @@ const handleDetail=(e:React.ChangeEvent<HTMLSelectElement>)=>{
   setFilter((pre)=>{
     return {...pre,[name]:value}
   })
+  setPage(1)
 }
 const handleClick=async(job:SearchJob)=>{
   setFilter({
@@ -85,18 +87,18 @@ const handleClick=async(job:SearchJob)=>{
     id:uuid(),
     searchDate:currentDate
   }
-  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
-  const listRef=await getDoc(userRef)
-  const dbList=listRef.data()
-  const newSearchJobs=[...dbList!.search,searchObj]
-  setDoc(userRef,{...dbList,search:newSearchJobs})
-
+  if(state.userInfo.email !==""){
+    const userRef=doc(db,"users",`${state.userInfo!.uid}`)
+    const listRef=await getDoc(userRef)
+    const dbList=listRef.data()
+    const newSearchJobs=[...dbList!.search,searchObj]
+    setDoc(userRef,{...dbList,search:newSearchJobs})
+  }
   setSearch(true)
   dispatch({
-      type:"search",payload:job
-    })
+    type:"search",payload:job
+  })
 }
-
 const onSave=async(id:string)=>{
   state.userInfo.email ==="" && setSignin(true)
   const favJob=list.find(item=>item.id===id)
@@ -115,10 +117,25 @@ const onSave=async(id:string)=>{
   if(oldJobIndex === -1){
     const newSavedJobs=[...dbList!.savedJobs,saved]
     setDoc(userRef,{...dbList,savedJobs:newSavedJobs})
+    dispatch({
+      type:"saveJobs_add",payload:saved
+    })
   } else{
     updateDoc(userRef,{...dbList})
   }
 }
+const deleteSavedJob=async(id:string)=>{
+  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+    const listRef=await getDoc(userRef)
+    const dbList=listRef.data()
+    const jobList=dbList!.savedJobs.filter((item:any)=>item.id!==id)
+    setDoc(userRef,{...dbList,savedJobs:job})
+    .then(()=>{
+      dispatch({
+      type:"saveJobs_delete", payload:jobList })
+    })
+}
+
 const onApply=async(id:string)=>{
   const applied=list.find((item)=>item.id===id)
     const appliedJob={
@@ -137,7 +154,7 @@ const onApply=async(id:string)=>{
       setDoc(userRef,{...dbList,applied:newAppliedJobs})
     } else {
       updateDoc(userRef,{...dbList})
-    }
+    }  
 }
 
   return (
@@ -171,15 +188,17 @@ const onApply=async(id:string)=>{
 </Row>
    <Row className="jobs">
     {list.map((job:Job,key:number)=>{
-      return (<>
+      return (
         <JobCard
           key={job.id}
           job={job}
           onSave={onSave}
           deleteJob={deleteJob}
           onApply={onApply}
+          deleteSavedJob={deleteSavedJob}
+
           />
-          </> )    
+           )    
     })}
     </Row></>
     : list.length ===0 && <div className="scroll-container"><p className="scroll-text">Find your job, let's go!</p></div>}
