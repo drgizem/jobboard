@@ -107,7 +107,8 @@ const onSave=async(id:string)=>{
     company:favJob!.company.display_name,
     location:favJob!.location.display_name,
     id:favJob!.id,
-    savedDate:currentDate}
+    savedDate:currentDate,
+    isSaved:true}
   const userRef=doc(db,"users",`${auth.currentUser!.uid}`) //!!!!
   const listRef=await getDoc(userRef)
   const dbList=listRef.data()
@@ -129,7 +130,7 @@ const deleteSavedJob=async(id:string)=>{
     const listRef=await getDoc(userRef)
     const dbList=listRef.data()
     const jobList=dbList!.savedJobs.filter((item:any)=>item.id!==id)
-    setDoc(userRef,{...dbList,savedJobs:job})
+    setDoc(userRef,{...dbList,savedJobs:jobList})
     .then(()=>{
       dispatch({
       type:"saveJobs_delete", payload:jobList })
@@ -196,7 +197,7 @@ const onApply=async(id:string)=>{
           deleteJob={deleteJob}
           onApply={onApply}
           deleteSavedJob={deleteSavedJob}
-
+          list={list}
           />
            )    
     })}

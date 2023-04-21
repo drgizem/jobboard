@@ -1,7 +1,7 @@
 import {Container,Row} from "react-bootstrap"
 import "../styles/Savedjobs.sass"
 import React, { useContext, useEffect, useState } from "react"
-import {GizemCard } from "./SavedCard";
+import {SavedCard } from "./SavedCard";
 import { SavedJob} from "../types";
 import { setDoc,getDoc,doc, onSnapshot,updateDoc } from "firebase/firestore";
 import {db} from "../firebase"
@@ -21,6 +21,7 @@ export const Saved=()=>{
       const list=dbList!.savedJobs
       setSaveList(list)
     })
+    return ()=>unSubscribe()
   }},[state.userInfo])
   
   const deleteJob=async(id:string)=>{
@@ -47,7 +48,6 @@ export const Saved=()=>{
     let oldJobIndex=newList.applied.findIndex((job:any)=>job.id===applied!.id)
     if(oldJobIndex===-1){
       const newAppliedJobs=[...dbList!.applied,appliedJob]
-      console.log(newAppliedJobs)
       updateDoc(userRef,{...dbList,applied:newAppliedJobs})
     } else {
       updateDoc(userRef,{...dbList})
@@ -61,7 +61,7 @@ export const Saved=()=>{
       <Row className="jobs">
     {saveList.map((job:SavedJob)=>{
       return( <>
-        <GizemCard
+        <SavedCard
           job={job}
           deleteJob={deleteJob}
           onApply={onApply}

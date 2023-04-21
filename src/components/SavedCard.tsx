@@ -14,7 +14,7 @@ type Props={
   onApply(id:string):void
 }
 
-export const GizemCard=({job,deleteJob,onApply}:Props)=>{
+export const SavedCard=({job,deleteJob,onApply}:Props)=>{
 const [show,setShow]=useState<boolean>(false)
 const [error,setError]=useState<boolean>(false)
 const [success,setSuccess]=useState<boolean>(false)
@@ -31,6 +31,7 @@ useEffect(()=>{
     const list=dbList!.applied
     setAppliedList(list)
     })
+    return ()=>unSubscribe()
   }
 },[state.userInfo])
 const handleApply=()=>{
@@ -40,7 +41,7 @@ const handleApply=()=>{
     setIsApplied(true)
   }
  }
-const handleContinue=async(id:string)=>{
+const handleContinue=(id:string)=>{
   setIsApplied(false)
   onApply(job.id)
   const jobAgain=appliedList.find(item=>item.id===id)

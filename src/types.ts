@@ -42,6 +42,7 @@ export type SavedJob={
   location:string,
   id:string,
   savedDate:string,
+  isSaved:boolean
 }
 export type Search={
   title:string,
@@ -55,4 +56,8 @@ export type AppliedJob={
   location:string,
   id:string,
   savedDate:string,
+}
+export type IsSaved={
+  id:string,
+  isSaved:boolean
 }

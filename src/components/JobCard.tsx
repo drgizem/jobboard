@@ -2,11 +2,11 @@ import { Card,Row,Col,Button,Form,Modal,Alert } from "react-bootstrap"
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BlockIcon from '@mui/icons-material/Block';
-import { currentDate, monthsStr } from "../info";
+import { monthsStr } from "../info";
 import { category } from "../category";
-import { Job, AppliedJob, SavedJob } from "../types";
+import { Job, AppliedJob, IsSaved } from "../types";
 import { useContext, useEffect, useState } from "react";
-import { setDoc,getDoc,doc,onSnapshot} from "firebase/firestore";
+import { getDoc,doc,onSnapshot} from "firebase/firestore";
 import {db,auth} from "../firebase"
 import { AuthContext } from "../AuthContext";
 import { Link } from "react-router-dom";
@@ -18,8 +18,9 @@ onSave(id:string):void
 deleteJob(id:string):void
 onApply(id:string):void
 deleteSavedJob(id:string):void
+list:Job[]
 }
-export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob}:Props)=>{
+export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob,list}:Props)=>{
   const [isApplied,setIsApplied]=useState<boolean>(false)
   const [show,setShow]=useState<boolean>(true)
   const {state,dispatch}=useContext(AuthContext)
@@ -28,46 +29,31 @@ export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob}:Props)=>{
   const [appliedList,setAppliedList]=useState<AppliedJob[]>([])
   const [error,setError]=useState<boolean>(false)
   const [success,setSuccess]=useState<boolean>(false)
-  const [save,setSave]=useState<Job>({
-  title:"",
-  category:{
-    label:""
-  },
-  company:{
-    display_name:""
-  },
-  location:{
-    display_name:""
-  },
-  salary_min:0,
-  created:"",
-  description:"",
+  const [save,setSave]=useState<IsSaved>({
   id:"",
-  savedDate:"",
   isSaved:false
   })
- 
+  const [newList,setNewList]=useState<Job[]>([])
    
 useEffect(()=>{
-  const findSaved=async(save:Job)=>{
+  const findSaved=async()=>{
     const userRef=doc(db,"users",`${state.userInfo!.uid}`) 
     const listRef=await getDoc(userRef)
     const dbList=listRef.data()
-     const saved=dbList!.find((item:any)=>item.id===save.id)
-     if(saved){
-      const newSaved={...saved,isSaved:true}
-      return setSave(newSaved)
-     }else {
-      return setSave((pre)=>{
-        return {...pre}
-      })
-     }
+    for(let i=0;i<dbList?.savedJobs?.length;i++){
+        const newList=[...list]
+        let oldSavedIndex=list.findIndex((item:any)=>item.id===dbList!.savedJobs[i].id)
+        let oldItem=newList[oldSavedIndex]
+        let newItem={...oldItem,isSaved:true}
+        newList[oldSavedIndex]=newItem
+        setSave(newItem)
+        setNewList(newList)
+        console.log(newList)
+    }
   }
-  findSaved(save)
+  findSaved()
 },[])
   
-
- 
   useEffect(()=>{
     if(state.userInfo.email !==""){
       const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
@@ -76,6 +62,7 @@ useEffect(()=>{
       const list=dbList!.applied
       setAppliedList(list)
       })
+      return ()=>unSubscribe()
     }
   },[state.userInfo])
   
