@@ -9,6 +9,7 @@ type ContextAction=
  | {type:"upload_page" ; payload:File[]}
  | {type:"saveJobs_add" ;payload:SavedJob}
  | {type:"saveJobs_delete" ;payload:SavedJob[]}
+ | {type:"uploadPhoto"; payload:string}
 
 
 
@@ -30,6 +31,8 @@ export const AuthReducer=(state:InitialStateType,action:ContextAction)=>{
         return {...state,savedList:[...state.savedList,action.payload]}
       case "saveJobs_delete":
         return {...state,savedList:action.payload}
+        case "uploadPhoto":
+          return {...state,userInfo:{...state.userInfo,photoURL:action.payload}}
         default:
           return state
   }

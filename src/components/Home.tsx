@@ -102,11 +102,12 @@ const handleClick=async(job:SearchJob)=>{
 const onSave=async(id:string)=>{
   state.userInfo.email ==="" && setSignin(true)
   const favJob=list.find(item=>item.id===id)
+  const newFav={...favJob,isSaved:true}
   const saved={
-    title:favJob!.title,
-    company:favJob!.company.display_name,
-    location:favJob!.location.display_name,
-    id:favJob!.id,
+    title:newFav!.title,
+    company:newFav!.company!.display_name,
+    location:newFav!.location!.display_name,
+    id:newFav!.id,
     savedDate:currentDate,
     isSaved:true}
   const userRef=doc(db,"users",`${auth.currentUser!.uid}`) //!!!!

@@ -2,10 +2,12 @@ import {Container,Form,Card, Button} from "react-bootstrap"
 import "../styles/Profile.sass"
 import React, { useContext,useState,useEffect } from "react"
 import { AuthContext } from "../AuthContext"
-import { storage} from "../firebase";
+import { auth,db,storage} from "../firebase";
 import {ref, uploadBytesResumable,getDownloadURL,uploadBytes,listAll,deleteObject} from "firebase/storage"
 import ClearIcon from '@mui/icons-material/Clear';
 import { Avatar } from "@mui/material";
+import { getDoc,doc, setDoc } from "firebase/firestore";
+import { updateProfile } from "firebase/auth";
 
 
 export const Profile=()=>{
@@ -79,17 +81,28 @@ const handleSubmitImg=(e:any)=>{
           });
         setImage(null);
       })
+      .then(()=>{
+        updateProfile(auth.currentUser!,{
+          photoURL:imgUrl
+      })
+     })
+     .then(()=>{
+      dispatch({
+        type:"uploadPhoto",payload:imgUrl
+      })
+    })
       .catch((error) => {
         console.log(error.message);
       });
 }
-console.log(imgUrl)
+console.log(state.userInfo.photoURL)
+
   return(
     <Container className="mt-5">
       <div className="d-flex profile">
       <div><h2>{state.userInfo.displayName}</h2>
       <p>{state.userInfo.email}</p></div>
-      <div><Avatar src={imgUrl} sx={{width:150,height:150}}/></div>
+      <div><Avatar src={state.userInfo.photoURL} sx={{width:150,height:150}}/></div>
       </div>
       <div className="mt-3 mb-5">
         <Form validated={validated}>
