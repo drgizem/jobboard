@@ -1,27 +1,33 @@
-import {useState,useEffect } from "react"
+import {useState,useEffect,useContext } from "react"
 import "../styles/Search.sass"
 import { Container,Card } from "react-bootstrap"
 import {Search} from "../types"
 import ClearIcon from '@mui/icons-material/Clear';
 import { setDoc,getDoc,doc, onSnapshot } from "firebase/firestore";
 import {db,auth} from "../firebase"
+import { AuthContext } from "../AuthContext";
+
 
 export const Searchjob=()=>{
   const [list,setList]=useState<Search[]>([])
-  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+  
+  const {state}=useContext(AuthContext)
 
   useEffect(()=>{
-    const unSubscribe=onSnapshot(userRef,(doc)=>{
-      const dbList=doc.data()
-      const list=dbList!.search
-      setList(list)
-    })
-    return ()=>{
-      unSubscribe()
+    if(state.userInfo.email !==""){
+      const userRef=doc(db,"users",`${state.userInfo!.uid}`)
+      const unSubscribe=onSnapshot(userRef,(doc)=>{
+        const dbList=doc.data()
+        const list=dbList!.search
+        setList(list)
+      })
+      return ()=>{
+        unSubscribe()
+    }
     }// eslint-disable-next-line
   },[])
-
   const deleteSearch=async(id:string)=>{
+    const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
     const listRef=await getDoc(userRef)
     const dbList=listRef.data()
     const job=dbList!.search.filter((item:any)=>item.id!==id)

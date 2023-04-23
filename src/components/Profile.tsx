@@ -2,29 +2,30 @@ import {Container,Form,Card, Button} from "react-bootstrap"
 import "../styles/Profile.sass"
 import React, { useContext,useState,useEffect } from "react"
 import { AuthContext } from "../AuthContext"
-import { auth,db,storage} from "../firebase";
-import {ref, uploadBytesResumable,getDownloadURL,uploadBytes,listAll,deleteObject} from "firebase/storage"
+import { auth,storage} from "../firebase";
+import {ref, uploadBytesResumable,getDownloadURL,listAll,deleteObject} from "firebase/storage"
 import ClearIcon from '@mui/icons-material/Clear';
 import { Avatar } from "@mui/material";
-import { getDoc,doc, setDoc } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
+import uuid from "react-uuid";
 
 
 export const Profile=()=>{
-  const {state,dispatch}=useContext(AuthContext)
+ const {state,dispatch}=useContext(AuthContext)
  const [userFile,setUserFile]=useState<File>({} as File)
  const [image,setImage]=useState<any>(null)
  const [imgUrl,setImgUrl]=useState(null || "")
  const [url,setUrl]=useState<string[]>([])
  const [upload,setUpload]=useState<boolean>(true)
  const [validated,setValidated]=useState<boolean>(false)
+ const [loading,setLoading]=useState<boolean>(false)
 
- const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
-
+  const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
+  const name=userFile.name+uuid()
   const handleSubmit=(e:any)=>{
     e.preventDefault()
     setValidated(true)
-    const storageRef=ref(storage,`/${state.userInfo!.uid}/${userFile.name}`)
+    const storageRef=ref(storage,`/${state.userInfo!.uid}/${userFile.name+uuid()}`)
     uploadBytesResumable(storageRef,userFile).then((snapshot)=>{
       getDownloadURL(snapshot.ref).then((url) => {
         setUrl((prev) => [...prev, url]);
@@ -37,6 +38,37 @@ export const Profile=()=>{
     setUpload(true)
   })  
   }
+  useEffect(()=>{
+    const uploadFile=()=>{
+      const imageRef=ref(storage,`/${state.userInfo!.uid}/image`)
+      const uploadTask=uploadBytesResumable(imageRef, image)
+      uploadTask.on('state_changed', 
+    (snapshot:any) => {
+      const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      console.log('Upload is ' + progress + '% done');
+      switch (snapshot.state) {
+        case 'paused':
+          console.log('Upload is paused');
+          break;
+        case 'running':
+          console.log('Upload is running');
+          break;
+        default:
+          break;
+      }
+    }, 
+    (error:any) => {
+      console.log(error)
+    }, 
+    () => {
+          getDownloadURL(imageRef)
+            .then((url) => {
+              setImgUrl(url);
+            })})
+    }
+    image && uploadFile()
+  },[image])
   useEffect(()=>{
     listAll(fileListRef).then((response)=>{
       response.items.forEach((item)=>{
@@ -55,6 +87,7 @@ export const Profile=()=>{
   const handleDelete=(name:string)=>{
     const deleteRef=ref(storage,`${state.userInfo!.uid}/${name}`)
     const newFile=state.list.find(item=>item.name ===name)
+    console.log(name)
     deleteObject(deleteRef).then(()=>{
       dispatch({
         type:"resume_delete",payload:newFile
@@ -64,38 +97,19 @@ export const Profile=()=>{
   const handleChangeImg = (e:any) => {
     if (e.target.files[0]) {
       setImage(e.target.files[0]);
+      setLoading(true)
     }
   };
 const handleSubmitImg=(e:any)=>{
   e.preventDefault()
     setValidated(true)
-    const imageRef=ref(storage,`/${state.userInfo!.uid}/image`)
-    uploadBytes(imageRef, image)
-      .then(() => {
-        getDownloadURL(imageRef)
-          .then((url) => {
-            setImgUrl(url);
-          })
-          .catch((error) => {
-            console.log(error.message, "error getting the image url");
-          });
-        setImage(null);
-      })
-      .then(()=>{
-        updateProfile(auth.currentUser!,{
-          photoURL:imgUrl
-      })
-     })
-     .then(()=>{
-      dispatch({
-        type:"uploadPhoto",payload:imgUrl
-      })
+    updateProfile(auth.currentUser!,{
+      photoURL:imgUrl
     })
-      .catch((error) => {
-        console.log(error.message);
-      });
+    dispatch({
+      type:"uploadPhoto",payload:imgUrl
+     })
 }
-console.log(state.userInfo.photoURL)
 
   return(
     <Container className="mt-5">
@@ -107,7 +121,7 @@ console.log(state.userInfo.photoURL)
       <div className="mt-3 mb-5">
         <Form validated={validated}>
         <Form.Control required type="file" onChange={handleChangeImg}></Form.Control>
-        <Button variant="success" className="mt-3" onClick={handleSubmitImg}>Upload Image</Button>
+        <Button disabled={loading===false} variant="success" className="mt-3" onClick={handleSubmitImg}>Upload Image</Button>
         </Form>
       </div>
       <Form validated={validated} onSubmit={handleSubmit}>

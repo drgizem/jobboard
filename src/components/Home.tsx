@@ -14,6 +14,7 @@ import { currentDate} from "../info";
 import { JobCard } from "./JobCard";
 import { FilterPart } from "./Filter";
 import {ref, listAll} from "firebase/storage"
+import { SearchPart } from "./SearchPart";
 
 export const Home=()=>{
 const [list,setList]=useState<Job[]>([])
@@ -27,6 +28,7 @@ const [filter,setFilter]=useState<Filter>({
   employ:""
 })
 const [search,setSearch]=useState<boolean>(false)
+const [recent,setRecent]=useState<SearchJob>({} as SearchJob)
 
 useEffect(()=>{
   const fetchApi= async ()=>{
@@ -41,6 +43,19 @@ useEffect(()=>{
 },[filter,page])
 
 useEffect(()=>{
+  const fetchApi= async ()=>{
+    const res=await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/${page}?app_id=f56bbe74&app_key=b8dde6bfd2f9c162d16ae945cafec698&results_per_page=9&title_only=${recent.title}&where=${recent.location}${filter.posted}${filter.salary}${filter.employ}`,
+      {
+        method:"GET"
+      });
+      const data=await res.json();
+      setList(data.results)
+  }
+  fetchApi()// eslint-disable-next-line
+},[recent])
+
+
+useEffect(()=>{
   const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
   listAll(fileListRef)
       .then((response)=>{
@@ -49,7 +64,6 @@ useEffect(()=>{
         })
       })// eslint-disable-next-line
 },[])
-
 
 const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
   const {name,value}=e.target
@@ -158,6 +172,16 @@ const onApply=async(id:string)=>{
       updateDoc(userRef,{...dbList})
     }  
 }
+const onSearch=async(id:string)=>{
+  setSearch(true)
+  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+  const listRef=await getDoc(userRef)
+  const dbList=listRef.data()
+  const search=dbList!.search.find((item:any)=>item.id===id)
+  setRecent((pre)=>{
+    return {title:search.title,location:search.location}
+  })
+}
 
   return (
     <Container >
@@ -204,6 +228,7 @@ const onApply=async(id:string)=>{
     })}
     </Row></>
     : list.length ===0 && <div className="scroll-container"><p className="scroll-text">Find your job, let's go!</p></div>}
+     {!search && state.userInfo.email !=="" && <SearchPart handleClick={onSearch}/>}  
    {list.length !==0 && 
    (<div className="page">
    <ArrowBackIosIcon style={{visibility: page===1 ? "hidden" : "visible"}} onClick={onDecreasePage} />

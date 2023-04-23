@@ -6,8 +6,8 @@ import { monthsStr } from "../info";
 import { category } from "../category";
 import { Job, AppliedJob, IsSaved } from "../types";
 import { useContext, useEffect, useState } from "react";
-import { getDoc,doc,onSnapshot} from "firebase/firestore";
-import {db,auth} from "../firebase"
+import { doc,onSnapshot} from "firebase/firestore";
+import {db} from "../firebase"
 import { AuthContext } from "../AuthContext";
 import { Link } from "react-router-dom";
 import { Navigate } from "react-router-dom";
@@ -23,7 +23,7 @@ list:Job[]
 export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob,list}:Props)=>{
   const [isApplied,setIsApplied]=useState<boolean>(false)
   const [show,setShow]=useState<boolean>(true)
-  const {state,dispatch}=useContext(AuthContext)
+  const {state}=useContext(AuthContext)
   const [resume,setResume]=useState<boolean>(false)
   const [signin,setSignin]=useState<boolean>(false)
   const [appliedList,setAppliedList]=useState<AppliedJob[]>([])
@@ -33,30 +33,10 @@ export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob,list}:Props)=
   id:"",
   isSaved:false
   })
-  const [newList,setNewList]=useState<Job[]>([])
-   
-useEffect(()=>{
-  const findSaved=async()=>{
-    const userRef=doc(db,"users",`${state.userInfo!.uid}`) 
-    const listRef=await getDoc(userRef)
-    const dbList=listRef.data()
-    for(let i=0;i<dbList?.savedJobs?.length;i++){
-        const newList=[...list]
-        let oldSavedIndex=list.findIndex((item:any)=>item.id===dbList!.savedJobs[i].id)
-        let oldItem=newList[oldSavedIndex]
-        let newItem={...oldItem,isSaved:true}
-        newList[oldSavedIndex]=newItem
-        setSave(newItem)
-        setNewList(newList)
-        console.log(newList)
-    }
-  }
-  findSaved()
-},[])
-
+ 
   useEffect(()=>{
     if(state.userInfo.email !==""){
-      const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+      const userRef=doc(db,"users",`${state.userInfo!.uid}`)
       const unSubscribe=onSnapshot(userRef,(doc)=>{
       const dbList=doc.data()
       const list=dbList!.applied
@@ -134,7 +114,7 @@ useEffect(()=>{
          >
            <Modal.Dialog>
              <Modal.Body>
-              <p>Do you want to apply with "{state.list[state.list.length-1].name}" you uploaded?</p>
+              <p>Do you want to apply with "{state.list[state.list.length-1].name ==="image" ? state.list[state.list.length-2].name :state.list[state.list.length-2].name}" you uploaded?</p>
              </Modal.Body>
              <Modal.Footer>
                <Button variant="success" onClick={()=>handleContinue(job.id)}>Continue</Button>
