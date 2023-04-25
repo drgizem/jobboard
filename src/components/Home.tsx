@@ -30,8 +30,6 @@ const [filter,setFilter]=useState<Filter>({
 const [search,setSearch]=useState<boolean>(false)
 const [spinner,setSpinner]=useState(false)
 
-
-
 useEffect(()=>{
   const fetchApi= async ()=>{
     const res=await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/${page}?app_id=${process.env.REACT_APP_ADMIN_ID}&app_key=${process.env.REACT_APP_API_KEY}&results_per_page=9&title_only=${job.title}&where=${job.location}${filter.posted}${filter.salary}${filter.employ}`,

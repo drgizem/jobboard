@@ -21,7 +21,6 @@ export const Applied=()=>{
       unSubscribe()
     }
   },[])
-  
   return(
     <Container>
       <h2 className="mt-5">Applied Jobs</h2>
