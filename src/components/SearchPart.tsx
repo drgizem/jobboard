@@ -14,13 +14,16 @@ type Props={
 export const SearchPart=({handleClick}:Props)=>{
     const [list,setList]=useState<Search[]>([])
     const {state}=useContext(AuthContext)
-    const userRef=doc(db,"users",`${state.userInfo!.uid}`)
+    
     useEffect(()=>{
       if(state.userInfo.email !==""){
+        const userRef=doc(db,"users",`${state.userInfo!.uid}`)
         const unSubscribe=onSnapshot(userRef,(doc)=>{
           const dbList=doc.data()
-          const list=dbList!.search
-          setList(list)
+          if(dbList){
+            const list=dbList!.search
+            setList(list)
+          }
         })
         return ()=>{
           unSubscribe()
@@ -28,6 +31,7 @@ export const SearchPart=({handleClick}:Props)=>{
       }// eslint-disable-next-line
     },[])
     const deleteSearch=async(id:string)=>{
+      const userRef=doc(db,"users",`${state.userInfo!.uid}`)
       const listRef=await getDoc(userRef)
       const dbList=listRef.data()
       const job=dbList!.search.filter((item:any)=>item.id!==id)
@@ -38,7 +42,7 @@ export const SearchPart=({handleClick}:Props)=>{
    <h2 className="mt-5">My Recent Searches</h2>
       <hr></hr>
    {list && list.map((job:Search,key:number)=>{
-        return (<><Card className="mb-3">
+        return (<><Card className="mb-3" key={job.id}>
           <Card.Body onClick={()=>handleClick(job.id)}  style={{display:"flex",justifyContent:"start",alignItems:"center"}}>
           <div><p>{job.title}</p>
           <Card.Subtitle>in {job.location}</Card.Subtitle></div>

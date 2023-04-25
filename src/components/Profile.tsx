@@ -8,6 +8,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { Avatar } from "@mui/material";
 import { updateProfile } from "firebase/auth";
 import uuid from "react-uuid";
+import { useNavigate } from 'react-router'
 
 
 export const Profile=()=>{
@@ -16,12 +17,13 @@ export const Profile=()=>{
  const [image,setImage]=useState<any>(null)
  const [imgUrl,setImgUrl]=useState(null || "")
  const [url,setUrl]=useState<string[]>([])
- const [upload,setUpload]=useState<boolean>(true)
  const [validated,setValidated]=useState<boolean>(false)
  const [loading,setLoading]=useState<boolean>(false)
+ const navigate = useNavigate()
 
   const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
   const name=userFile.name+uuid()
+
   const handleSubmit=(e:any)=>{
     e.preventDefault()
     setValidated(true)
@@ -35,10 +37,10 @@ export const Profile=()=>{
         type:"resume_add",payload:userFile
       })
     })
-    setUpload(true)
-  })  
+    navigate(0)
+  }) 
   }
-  
+
   useEffect(()=>{
     const uploadFile=()=>{
       const imageRef=ref(storage,`/${state.userInfo!.uid}/image`)
@@ -69,7 +71,7 @@ export const Profile=()=>{
             })})
     }
     image && uploadFile()
-  },[image])
+  },[image]) // eslint-disable-next-line
   useEffect(()=>{
     listAll(fileListRef).then((response)=>{
       response.items.forEach((item)=>{
@@ -82,13 +84,11 @@ export const Profile=()=>{
           })
         })
       })
-      state.list.length===0 && setUpload(false)
     })
-  },[])
+  },[]) 
   const handleDelete=(name:string)=>{
     const deleteRef=ref(storage,`${state.userInfo!.uid}/${name}`)
     const newFile=state.list.find(item=>item.name ===name)
-    console.log(name)
     deleteObject(deleteRef).then(()=>{
       dispatch({
         type:"resume_delete",payload:newFile
@@ -111,6 +111,7 @@ const handleSubmitImg=(e:any)=>{
       type:"uploadPhoto",payload:imgUrl
      })
 }
+
 
   return(
     <Container className="mt-5">
@@ -136,7 +137,7 @@ const handleSubmitImg=(e:any)=>{
         <Card.Body><a href={url[state.list.findIndex((item)=>item===file)]}>{file.name}</a></Card.Body>
         <ClearIcon onClick={()=>handleDelete(file.name)}/>
         </Card>})}
-        {!upload && <div className="text-danger mt-3">*No uploaded resume</div>}
+        {state.list.length===0 && <div className="text-danger mt-3">*No uploaded resume</div>}
     </Container>
   )
 }

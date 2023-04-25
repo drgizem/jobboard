@@ -1,13 +1,15 @@
-import { useState ,useEffect} from "react"
+import { useState ,useEffect, useContext} from "react"
 import "../styles/Applied.sass"
 import { Container,Card } from "react-bootstrap"
 import {AppliedJob } from "../types"
 import { doc,onSnapshot } from "firebase/firestore";
 import {db,auth} from "../firebase"
+import { AuthContext } from "../AuthContext";
 
 export const Applied=()=>{
   const [appliedList,setAppliedList]=useState<AppliedJob[]>([])
-  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+  const {state}=useContext(AuthContext)
+  const userRef=doc(db,"users",`${state.userInfo!.uid}`)
   
   useEffect(()=>{
     const unSubscribe=onSnapshot(userRef,(doc)=>{

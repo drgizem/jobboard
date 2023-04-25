@@ -1,5 +1,5 @@
 import { File, InitialStateType, SearchJob, UserInfo } from "./AuthContext"
-import { SavedJob } from "./types";
+
 
 
 type ContextAction=

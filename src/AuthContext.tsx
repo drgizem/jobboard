@@ -29,7 +29,7 @@ export type File={
   name:string,
   id:string
 }
-export const INITIAL_STATE:InitialStateType=JSON.parse(localStorage.getItem("user") || "" ) || {
+export const INITIAL_STATE:InitialStateType=JSON.parse(localStorage.getItem("user") || "null") || {
   userInfo:{email:"",
     uid:"",
     displayName:"",
@@ -53,7 +53,7 @@ export const AuthContextProvider=({children}:{ children: React.ReactNode })=>{
 
   useEffect(()=>{
     localStorage.setItem("user", JSON.stringify(state))
-  },[state.userInfo,state.isLogin,state.list])
+  },[state])
  
   
   return (

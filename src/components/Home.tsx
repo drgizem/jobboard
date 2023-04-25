@@ -28,24 +28,22 @@ const [filter,setFilter]=useState<Filter>({
   employ:""
 })
 const [search,setSearch]=useState<boolean>(false)
-const [recent,setRecent]=useState<SearchJob>({} as SearchJob)
 const [spinner,setSpinner]=useState(false)
+
+
 
 useEffect(()=>{
   const fetchApi= async ()=>{
-    setSpinner(true)
-    const res=await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/${page}?app_id=f56bbe74&app_key=b8dde6bfd2f9c162d16ae945cafec698&results_per_page=9&title_only=${job.title}&where=${job.location}${filter.posted}${filter.salary}${filter.employ}`,
+    const res=await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/${page}?app_id=${process.env.REACT_APP_ADMIN_ID}&app_key=${process.env.REACT_APP_API_KEY}&results_per_page=9&title_only=${job.title}&where=${job.location}${filter.posted}${filter.salary}${filter.employ}`,
       {
-        method:"GET",
-        mode: "no-cors"
+        method:"GET"
       });
       const data=await res.json();
       setList(data.results)
     }
-  fetchApi()// eslint-disable-next-line
-  list.length===0 && setSpinner(false)
-},[filter,page])
-
+    setSpinner(false)
+    fetchApi()
+},[filter,page])// eslint-disable-next-line
 
 const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
   const {name,value}=e.target
@@ -146,6 +144,7 @@ const onApply=async(id:string)=>{
     }  
 }
 const onSearch=async(id:string)=>{
+  setSpinner(true)
   setSearch(true)
   const userRef=doc(db,"users",`${state.userInfo!.uid}`)
   const listRef=await getDoc(userRef)
@@ -167,14 +166,13 @@ const onSearch=async(id:string)=>{
   }
   const newSearchJobs=[...dbList!.search,searchObj]
   setDoc(userRef,{...dbList,search:newSearchJobs})
-  setSpinner(true)
+ 
 }
 
-console.log(list)
   return (
     <Container >
      {signin && <Navigate to="/signin"/>}
-    <Row className="mt-5">
+    <Row className="mt-5 inputrow">
       <Stack direction="horizontal" gap={5}>
       <Form.Group className="mb-3" controlId="formBasicEmail">
       <Form.Label>What </Form.Label>
@@ -184,7 +182,7 @@ console.log(list)
       <Form.Label>Where</Form.Label>
       <Form.Control className="me-auto" type="text" placeholder="United States" name="location" value={job.location || ""} onChange={handleChange}/>
     </Form.Group>
-    <Button variant="success" onClick={()=>handleClick(job)}>
+    <Button className="searchbtn" variant="success" onClick={()=>handleClick(job)}>
       Search
     </Button>
     </Stack>
@@ -196,7 +194,7 @@ console.log(list)
     <Row className="mb-3">
       <FilterPart handleDetail={handleDetail} filter={filter}/>
   </Row>
-  {spinner ? <Spinner animation="border" variant="success"/> : <div className="no_found mt-5">*No found jobs, try again</div>} </>
+  {spinner ? <Spinner animation="border" variant="success"/> : <div className="no_found mt-5">*No found jobs, try again</div>}</>
    : <><Row className="mb-3">
    <FilterPart handleDetail={handleDetail} filter={filter}/>
 </Row>
