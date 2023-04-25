@@ -4,17 +4,17 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import {useContext, useState,useEffect} from "react"
 import { AuthContext } from '../AuthContext';
-import {Container,Row,Form,Button,Stack} from "react-bootstrap"
+import {Container,Row,Form,Button,Stack, Spinner} from "react-bootstrap"
 import {Job,Filter} from "../types"
 import { SearchJob } from "../AuthContext";
 import uuid from "react-uuid";
 import { setDoc,getDoc,doc, updateDoc } from "firebase/firestore";
-import {db,auth,storage} from "../firebase"
+import {db} from "../firebase"
 import { currentDate} from "../info";
 import { JobCard } from "./JobCard";
 import { FilterPart } from "./Filter";
-import {ref, listAll} from "firebase/storage"
 import { SearchPart } from "./SearchPart";
+
 
 export const Home=()=>{
 const [list,setList]=useState<Job[]>([])
@@ -29,41 +29,23 @@ const [filter,setFilter]=useState<Filter>({
 })
 const [search,setSearch]=useState<boolean>(false)
 const [recent,setRecent]=useState<SearchJob>({} as SearchJob)
+const [spinner,setSpinner]=useState(false)
 
 useEffect(()=>{
   const fetchApi= async ()=>{
+    setSpinner(true)
     const res=await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/${page}?app_id=f56bbe74&app_key=b8dde6bfd2f9c162d16ae945cafec698&results_per_page=9&title_only=${job.title}&where=${job.location}${filter.posted}${filter.salary}${filter.employ}`,
       {
-        method:"GET"
+        method:"GET",
+        mode: "no-cors"
       });
       const data=await res.json();
       setList(data.results)
-  }
+    }
   fetchApi()// eslint-disable-next-line
+  list.length===0 && setSpinner(false)
 },[filter,page])
 
-useEffect(()=>{
-  const fetchApi= async ()=>{
-    const res=await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/${page}?app_id=f56bbe74&app_key=b8dde6bfd2f9c162d16ae945cafec698&results_per_page=9&title_only=${recent.title}&where=${recent.location}${filter.posted}${filter.salary}${filter.employ}`,
-      {
-        method:"GET"
-      });
-      const data=await res.json();
-      setList(data.results)
-  }
-  fetchApi()// eslint-disable-next-line
-},[recent])
-
-
-useEffect(()=>{
-  const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
-  listAll(fileListRef)
-      .then((response)=>{
-        dispatch({
-          type:"upload_page",payload:response.items
-        })
-      })// eslint-disable-next-line
-},[])
 
 const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
   const {name,value}=e.target
@@ -116,15 +98,13 @@ const handleClick=async(job:SearchJob)=>{
 const onSave=async(id:string)=>{
   state.userInfo.email ==="" && setSignin(true)
   const favJob=list.find(item=>item.id===id)
-  const newFav={...favJob,isSaved:true}
   const saved={
-    title:newFav!.title,
-    company:newFav!.company!.display_name,
-    location:newFav!.location!.display_name,
-    id:newFav!.id,
-    savedDate:currentDate,
-    isSaved:true}
-  const userRef=doc(db,"users",`${auth.currentUser!.uid}`) //!!!!
+    title:favJob!.title,
+    company:favJob!.company!.display_name,
+    location:favJob!.location!.display_name,
+    id:favJob!.id,
+    savedDate:currentDate}
+  const userRef=doc(db,"users",`${state.userInfo!.uid}`)
   const listRef=await getDoc(userRef)
   const dbList=listRef.data()
   const newList={...dbList}
@@ -133,23 +113,16 @@ const onSave=async(id:string)=>{
   if(oldJobIndex === -1){
     const newSavedJobs=[...dbList!.savedJobs,saved]
     setDoc(userRef,{...dbList,savedJobs:newSavedJobs})
-    dispatch({
-      type:"saveJobs_add",payload:saved
-    })
   } else{
     updateDoc(userRef,{...dbList})
   }
 }
 const deleteSavedJob=async(id:string)=>{
-  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+    const userRef=doc(db,"users",`${state.userInfo!.uid}`)
     const listRef=await getDoc(userRef)
     const dbList=listRef.data()
     const jobList=dbList!.savedJobs.filter((item:any)=>item.id!==id)
     setDoc(userRef,{...dbList,savedJobs:jobList})
-    .then(()=>{
-      dispatch({
-      type:"saveJobs_delete", payload:jobList })
-    })
 }
 
 const onApply=async(id:string)=>{
@@ -160,7 +133,7 @@ const onApply=async(id:string)=>{
       location:applied!.location.display_name,
       id:applied!.id,
       savedDate:currentDate}
-    const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+    const userRef=doc(db,"users",`${state.userInfo!.uid}`)
     const listRef=await getDoc(userRef)
     const dbList=listRef.data()
     const newList={...dbList}
@@ -174,15 +147,30 @@ const onApply=async(id:string)=>{
 }
 const onSearch=async(id:string)=>{
   setSearch(true)
-  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
+  const userRef=doc(db,"users",`${state.userInfo!.uid}`)
   const listRef=await getDoc(userRef)
   const dbList=listRef.data()
   const search=dbList!.search.find((item:any)=>item.id===id)
-  setRecent((pre)=>{
+  setJob((pre)=>{
     return {title:search.title,location:search.location}
   })
+  setFilter({
+    posted:"",
+    employ:"",
+    salary:""
+  })
+  const searchObj = {
+    title:search.title,
+    location:search.location,
+    id:uuid(),
+    searchDate:currentDate
+  }
+  const newSearchJobs=[...dbList!.search,searchObj]
+  setDoc(userRef,{...dbList,search:newSearchJobs})
+  setSpinner(true)
 }
 
+console.log(list)
   return (
     <Container >
      {signin && <Navigate to="/signin"/>}
@@ -208,7 +196,7 @@ const onSearch=async(id:string)=>{
     <Row className="mb-3">
       <FilterPart handleDetail={handleDetail} filter={filter}/>
   </Row>
-  <div className="no_found mt-5">*No found jobs, try again</div> </>
+  {spinner ? <Spinner animation="border" variant="success"/> : <div className="no_found mt-5">*No found jobs, try again</div>} </>
    : <><Row className="mb-3">
    <FilterPart handleDetail={handleDetail} filter={filter}/>
 </Row>
@@ -222,7 +210,6 @@ const onSearch=async(id:string)=>{
           deleteJob={deleteJob}
           onApply={onApply}
           deleteSavedJob={deleteSavedJob}
-          list={list}
           />
            )    
     })}

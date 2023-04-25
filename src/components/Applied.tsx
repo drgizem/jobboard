@@ -7,10 +7,9 @@ import {db,auth} from "../firebase"
 
 export const Applied=()=>{
   const [appliedList,setAppliedList]=useState<AppliedJob[]>([])
-
+  const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
   
   useEffect(()=>{
-    const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
     const unSubscribe=onSnapshot(userRef,(doc)=>{
       const dbList=doc.data()
       const list=dbList!.applied
@@ -36,6 +35,7 @@ export const Applied=()=>{
         </Card.Body>
         </Card>)
       })} 
+      {appliedList.length===0 && <p>There no applied jobs</p>}
     </Container>
   )
 }

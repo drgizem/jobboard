@@ -38,6 +38,7 @@ export const Profile=()=>{
     setUpload(true)
   })  
   }
+  
   useEffect(()=>{
     const uploadFile=()=>{
       const imageRef=ref(storage,`/${state.userInfo!.uid}/image`)
@@ -119,8 +120,8 @@ const handleSubmitImg=(e:any)=>{
       <div><Avatar src={state.userInfo.photoURL} sx={{width:150,height:150}}/></div>
       </div>
       <div className="mt-3 mb-5">
-        <Form validated={validated}>
-        <Form.Control required type="file" onChange={handleChangeImg}></Form.Control>
+        <Form>
+        <Form.Control type="file" onChange={handleChangeImg}></Form.Control>
         <Button disabled={loading===false} variant="success" className="mt-3" onClick={handleSubmitImg}>Upload Image</Button>
         </Form>
       </div>

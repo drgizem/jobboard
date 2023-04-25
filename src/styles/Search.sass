@@ -1,4 +1,17 @@
 @import "./mixin"
+@import "./colors"
 
-.search_date
+
+
+.card
+  display: flex
+  flex-direction: row !important
+  align-items: center
+  justify-content: space-between
+  &:hover
+    border-color: $main-color
+  .search_date
   @include font-size
+.nosearch
+  color: $scroll-text-color
+  font-weight: 600

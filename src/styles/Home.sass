@@ -2,6 +2,16 @@
 @import "./mixin"
 @import "./fonts"
 
+
+.form-control 
+  &:focus
+    outline: none
+    border-color: $main-color
+    box-shadow: 1px 1px $main-color
+.form-select
+  &:focus
+    border-color: $main-color !important
+    box-shadow: 1px 1px $main-color !important
 .scroll-text
   @include scroll-text
 .jobs
@@ -25,8 +35,9 @@
   display: flex
   flex-direction:row
   justify-content: center
-  margin-bottom: 0px
-  margin-top: 10px
+  bottom: 0px
+  left: 45%
+  margin-top: 5px
 
 .no_found
   max-width: 400px

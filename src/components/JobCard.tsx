@@ -11,6 +11,8 @@ import {db} from "../firebase"
 import { AuthContext } from "../AuthContext";
 import { Link } from "react-router-dom";
 import { Navigate } from "react-router-dom";
+import {ref, listAll} from "firebase/storage"
+import {storage} from "../firebase"
 
 type Props={
 job:Job,
@@ -18,21 +20,43 @@ onSave(id:string):void
 deleteJob(id:string):void
 onApply(id:string):void
 deleteSavedJob(id:string):void
-list:Job[]
 }
-export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob,list}:Props)=>{
-  const [isApplied,setIsApplied]=useState<boolean>(false)
-  const [show,setShow]=useState<boolean>(true)
-  const {state}=useContext(AuthContext)
-  const [resume,setResume]=useState<boolean>(false)
-  const [signin,setSignin]=useState<boolean>(false)
+export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob}:Props)=>{
+  const [isApplied,setIsApplied]=useState(false)
+  const [show,setShow]=useState(true)
+  const {state,dispatch}=useContext(AuthContext)
+  const [resume,setResume]=useState(false)
+  const [signin,setSignin]=useState(false)
   const [appliedList,setAppliedList]=useState<AppliedJob[]>([])
-  const [error,setError]=useState<boolean>(false)
-  const [success,setSuccess]=useState<boolean>(false)
+  const [error,setError]=useState(false)
+  const [success,setSuccess]=useState(false)
   const [save,setSave]=useState<IsSaved>({
   id:"",
   isSaved:false
   })
+  const [savedList,setSavedList]=useState<IsSaved[]>([])
+  
+  useEffect(()=>{
+    if(state.userInfo.email !==""){
+      const userRef=doc(db,"users",`${state.userInfo!.uid}`)
+      const unSubscribe=onSnapshot(userRef,(doc)=>{
+      const dbList=doc.data()
+      const list=dbList!.savedJobs
+      setSavedList(list)
+      })
+      return ()=>unSubscribe()
+    }
+  },[state.userInfo])
+
+  useEffect(()=>{
+    const findJob=(job:Job)=>{
+      const jobSaved=savedList.find((item)=>item.id===job.id)
+      if(jobSaved){
+        setSave({...jobSaved,isSaved:true})
+      }
+    }
+    findJob(job)
+  },[savedList]) 
  
   useEffect(()=>{
     if(state.userInfo.email !==""){
@@ -45,7 +69,16 @@ export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob,list}:Props)=
       return ()=>unSubscribe()
     }
   },[state.userInfo])
-  
+
+  useEffect(()=>{
+    const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
+    listAll(fileListRef)
+        .then((response)=>{
+          dispatch({
+            type:"upload_page",payload:response.items
+          })
+        })// eslint-disable-next-line
+  },[])
   const handleClick=(job:Job)=>{
     setSave({...job,isSaved:true})
     onSave(job.id)
@@ -58,7 +91,11 @@ export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob,list}:Props)=
     if(state.userInfo.email !==""){
       if(state.list.length ===0){
         setResume(true)
-      } else {
+      } else if(state.list.length ===1 && state.list[0].name==="image"){
+        setResume(true)
+      } else if(state.list.length ===1 && state.list[0].name!=="image"){
+        setIsApplied(true)
+      } else if(state.list.length >1){
         setIsApplied(true)
       }
     } else {
@@ -114,7 +151,7 @@ export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob,list}:Props)=
          >
            <Modal.Dialog>
              <Modal.Body>
-              <p>Do you want to apply with "{state.list[state.list.length-1].name ==="image" ? state.list[state.list.length-2].name :state.list[state.list.length-2].name}" you uploaded?</p>
+              <p>Do you want to apply with "{state.list[state.list.length-1].name ==="image" ? state.list[state.list.length-2].name : state.list[state.list.length-1].name}" you uploaded?</p>
              </Modal.Body>
              <Modal.Footer>
                <Button variant="success" onClick={()=>handleContinue(job.id)}>Continue</Button>

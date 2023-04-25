@@ -7,7 +7,6 @@ export type InitialStateType={
   isLogin:boolean,
   job:SearchJob,
   list:File[],
-  savedList:SavedJob[]
 }
 export type SearchJob={
   title:string,
@@ -30,17 +29,16 @@ export type File={
   name:string,
   id:string
 }
-
-export const INITIAL_STATE:InitialStateType=JSON.parse(localStorage.getItem("user") ||"") || {
+export const INITIAL_STATE:InitialStateType=JSON.parse(localStorage.getItem("user") || "" ) || {
   userInfo:{email:"",
     uid:"",
     displayName:"",
-    photoURL:"",},
+    photoURL:"",}, 
   isLogin:false,
   job:{title:"",location:""},
   list:[],
-  savedList:[]
 } 
+
 
 export const AuthContext = createContext<{
   state: InitialStateType;
@@ -55,9 +53,9 @@ export const AuthContextProvider=({children}:{ children: React.ReactNode })=>{
 
   useEffect(()=>{
     localStorage.setItem("user", JSON.stringify(state))
-  },[state.userInfo,state.savedList,state.isLogin,state.list])
+  },[state.userInfo,state.isLogin,state.list])
  
-
+  
   return (
     <AuthContext.Provider value={{dispatch,state}}>{children}</AuthContext.Provider>
   )

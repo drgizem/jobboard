@@ -29,7 +29,10 @@ export const Navbarmodal=()=>{
   return(
     <Navbar expand="lg" bg="dark" variant="dark" className='navbar'>
       <Container>
-        <Navbar.Brand><Link to="/"><img className="icon" src={clover} alt=""/></Link></Navbar.Brand>
+        <Navbar.Brand className="nav">
+        <Link to="/"><img className="icon" src={clover} alt=""/></Link>
+        <Link className="link" to="/"><p className="navbrand">Jobstery</p></Link>
+        </Navbar.Brand>
         {state.userInfo.email==="" ? <Link to='/signin' className="signin">Sign in</Link>
             : (
               <Dropdown drop="start">

@@ -1,12 +1,18 @@
-
+@import "./colors"
 
 .container
   .form
     margin-top: 30%
     margin-left: 25%
+    .form-control
+      &:focus
+        outline: none
+        border-color: $main-color
+        box-shadow: 1px 1px $main-color !important
   .card
     .card-body
       gap: 30px
+      font-size: 16px
       .img
         max-width: 30px 
     

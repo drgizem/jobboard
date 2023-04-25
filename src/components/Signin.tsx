@@ -47,7 +47,7 @@ export const Signin=()=>{
       <Form.Control className="mb-3" style={error || userError ? {borderColor:"red", backgroundImage:"none"} : {borderColor:"#ced4da"}} required onChange={handleChange}  name="password" value={user.password || ""}  type="password" placeholder="Enter your password"/>
       {error && <Form.Text className="mb-3 text-danger">Wrong password !</Form.Text>}
       {userError && <Form.Text className="mb-3 text-danger">User is not found!</Form.Text>}
-      <Form.Text className="mb-3 d-flex">Create an account<Link to="/signup"><div>Sign up</div></Link></Form.Text>
+      <Form.Text className="mb-3 d-flex">Create an account<Link to="/signup"><div className="mx-2">Sign up</div></Link></Form.Text>
       <Button variant="success"type="submit">Sign in</Button>
     </Form>
   </Container>

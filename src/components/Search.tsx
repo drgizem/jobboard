@@ -4,18 +4,17 @@ import { Container,Card } from "react-bootstrap"
 import {Search} from "../types"
 import ClearIcon from '@mui/icons-material/Clear';
 import { setDoc,getDoc,doc, onSnapshot } from "firebase/firestore";
-import {db,auth} from "../firebase"
+import {db} from "../firebase"
 import { AuthContext } from "../AuthContext";
 
 
 export const Searchjob=()=>{
   const [list,setList]=useState<Search[]>([])
-  
   const {state}=useContext(AuthContext)
+  const userRef=doc(db,"users",`${state.userInfo!.uid}`)
 
   useEffect(()=>{
     if(state.userInfo.email !==""){
-      const userRef=doc(db,"users",`${state.userInfo!.uid}`)
       const unSubscribe=onSnapshot(userRef,(doc)=>{
         const dbList=doc.data()
         const list=dbList!.search
@@ -27,7 +26,6 @@ export const Searchjob=()=>{
     }// eslint-disable-next-line
   },[])
   const deleteSearch=async(id:string)=>{
-    const userRef=doc(db,"users",`${auth.currentUser!.uid}`)
     const listRef=await getDoc(userRef)
     const dbList=listRef.data()
     const job=dbList!.search.filter((item:any)=>item.id!==id)
