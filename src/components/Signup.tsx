@@ -81,7 +81,7 @@ export const Signup=()=>{
       </Button>
      </Form>
      <h5 className="mt-4 signup">or Sign up with </h5>
-        <Card className="mt-4" style={{marginLeft:"25%"}}>
+        <Card className="mt-4 google" style={{marginLeft:"25%"}}>
           <Card.Body className="d-flex" onClick={handleGoogle}><img className="img" src={google} alt=""/>Continue with Google</Card.Body>
         </Card>
     </Container>
