@@ -43,6 +43,7 @@ const handleApply=()=>{
  }
 const handleContinue=(id:string)=>{
   setIsApplied(false)
+  setShow(true)
   onApply(job.id)
   const jobAgain=appliedList.find(item=>item.id===id)
   jobAgain ? setError(true) : setSuccess(true)
@@ -62,16 +63,17 @@ const handleContinue=(id:string)=>{
         </div>   
         </div>
       </Card.Body>
-      {success && <Alert variant="success" onClose={()=>setShow(false)} dismissible>Applied!</Alert>}
-      {error && <Alert variant="danger" onClose={()=>setShow(false)} dismissible>You applied before!</Alert>}
-      {isApplied &&
+    </Card>
+    {success && show && <Alert variant="success" onClose={()=>setShow(false)} dismissible>Applied!</Alert>}
+    {error && show && <Alert variant="danger" onClose={()=>setShow(false)} dismissible>You applied before!</Alert>}
+    {isApplied &&
         ( <div
        className="modal show"
        style={{ display: 'block', position: 'initial' }}
      >
        <Modal.Dialog>
          <Modal.Body>
-          <p>Do you want to apply with "{state.list[state.list.length-1].name}" you uploaded?</p>
+          <p>Do you want to apply with "{state.list[state.list.length-1].name ==="image" ? state.list[state.list.length-2].name : state.list[state.list.length-1].name}" you uploaded?</p>
          </Modal.Body>
          <Modal.Footer>
            <Button variant="success" onClick={()=>handleContinue(job.id)}>Continue</Button>
@@ -79,6 +81,5 @@ const handleContinue=(id:string)=>{
          </Modal.Footer>
        </Modal.Dialog>
      </div>)}
-    </Card>
     </>)
 }

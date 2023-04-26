@@ -22,12 +22,12 @@ export const Profile=()=>{
  const navigate = useNavigate()
 
   const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
-  const namefile=userFile.name+uuid()
+  const name=userFile.name+uuid()
 
   const handleSubmit=(e:any)=>{
     e.preventDefault()
     setValidated(true)
-    const storageRef=ref(storage,`/${state.userInfo!.uid}/${userFile.name+uuid()}`)
+    const storageRef=ref(storage,`/${state.userInfo!.uid}/${name}`)
     uploadBytesResumable(storageRef,userFile).then((snapshot)=>{
       getDownloadURL(snapshot.ref).then((url) => {
         setUrl((prev) => [...prev, url]);
@@ -87,7 +87,7 @@ export const Profile=()=>{
     }) // eslint-disable-next-line
   },[]) 
   const handleDelete=(name:string)=>{
-    const deleteRef=ref(storage,`${state.userInfo!.uid}/${namefile}`)
+    const deleteRef=ref(storage,`${state.userInfo!.uid}/${name}`)
     const newFile=state.list.find(item=>item.name ===name)
     deleteObject(deleteRef).then(()=>{
       dispatch({
@@ -103,7 +103,6 @@ export const Profile=()=>{
   };
 const handleSubmitImg=(e:any)=>{
   e.preventDefault()
-    setValidated(true)
     updateProfile(auth.currentUser!,{
       photoURL:imgUrl
     })

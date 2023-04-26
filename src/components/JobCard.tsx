@@ -55,7 +55,7 @@ export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob}:Props)=>{
         setSave({...jobSaved,isSaved:true})
       }
     }
-    findJob(job)
+    findJob(job) // eslint-disable-next-line
   },[savedList]) 
  
   useEffect(()=>{
@@ -104,6 +104,7 @@ export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob}:Props)=>{
   }
   const handleContinue=async(id:string)=>{
     setIsApplied(false)
+    setShow(true)
     onApply(job.id)
     const jobAgain=appliedList.find(item=>item.id===id)
     jobAgain ? setError(true) : setSuccess(true)
@@ -142,8 +143,8 @@ export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob}:Props)=>{
               </div></Row>
             </Card.Body>
           </Card>
-          {success && <Alert variant="success" onClose={()=>setShow(false)} dismissible>Applied!</Alert>}
-          {error && <Alert variant="danger" onClose={()=>setShow(false)} dismissible>You applied before!</Alert>}
+          {success && show && <Alert variant="success" onClose={()=>setShow(false)} dismissible>Applied!</Alert>}
+          {error && show && <Alert variant="danger" onClose={()=>setShow(false)} dismissible>You applied before!</Alert>}
           {isApplied &&
             ( <div
            className="modal show"
