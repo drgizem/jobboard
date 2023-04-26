@@ -40,8 +40,8 @@ useEffect(()=>{
       setList(data.results)
     }
     setSpinner(false)
-    fetchApi()
-},[filter,page])// eslint-disable-next-line
+    fetchApi() // eslint-disable-next-line
+},[filter,page])
 
 const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
   const {name,value}=e.target

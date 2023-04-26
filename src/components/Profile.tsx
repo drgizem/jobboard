@@ -22,7 +22,7 @@ export const Profile=()=>{
  const navigate = useNavigate()
 
   const fileListRef = ref(storage, `${state.userInfo!.uid}/`)
-  const name=userFile.name+uuid()
+  const namefile=userFile.name+uuid()
 
   const handleSubmit=(e:any)=>{
     e.preventDefault()
@@ -70,8 +70,8 @@ export const Profile=()=>{
               setImgUrl(url);
             })})
     }
-    image && uploadFile()
-  },[image]) // eslint-disable-next-line
+    image && uploadFile() // eslint-disable-next-line
+  },[image]) 
   useEffect(()=>{
     listAll(fileListRef).then((response)=>{
       response.items.forEach((item)=>{
@@ -84,10 +84,10 @@ export const Profile=()=>{
           })
         })
       })
-    })
+    }) // eslint-disable-next-line
   },[]) 
   const handleDelete=(name:string)=>{
-    const deleteRef=ref(storage,`${state.userInfo!.uid}/${name}`)
+    const deleteRef=ref(storage,`${state.userInfo!.uid}/${namefile}`)
     const newFile=state.list.find(item=>item.name ===name)
     deleteObject(deleteRef).then(()=>{
       dispatch({

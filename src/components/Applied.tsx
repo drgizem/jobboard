@@ -3,7 +3,7 @@ import "../styles/Applied.sass"
 import { Container,Card } from "react-bootstrap"
 import {AppliedJob } from "../types"
 import { doc,onSnapshot } from "firebase/firestore";
-import {db,auth} from "../firebase"
+import {db} from "../firebase"
 import { AuthContext } from "../AuthContext";
 
 export const Applied=()=>{
@@ -19,7 +19,7 @@ export const Applied=()=>{
     })
     return ()=>{
       unSubscribe()
-    }
+    } // eslint-disable-next-line
   },[])
   return(
     <Container>
