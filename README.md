@@ -4,6 +4,14 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 View demo: [Click here](https://main--gleaming-gingersnap-14a642.netlify.app/)
 
+## Technologies used:
+- React js
+- Typescript
+- Firebase 
+- Bootstrap
+- Sass
+- React Router
+
 ## Available Scripts
 
 In the project directory, you can run:
