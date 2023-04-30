@@ -15,7 +15,6 @@ type Props={
 }
 
 export const SavedCard=({job,deleteJob,onApply}:Props)=>{
-const [show,setShow]=useState<boolean>(false)
 const [error,setError]=useState<boolean>(false)
 const [success,setSuccess]=useState<boolean>(false)
 const [isApplied,setIsApplied]=useState<boolean>(false)
@@ -43,12 +42,12 @@ const handleApply=()=>{
  }
 const handleContinue=(id:string)=>{
   setIsApplied(false)
-  setShow(true)
   onApply(job.id)
   const jobAgain=appliedList.find(item=>item.id===id)
   jobAgain ? setError(true) : setSuccess(true)
+
  }
- 
+
   return (<>
     {resume && <Navigate to="/profile"/>}
       <Card className="mb-3">
@@ -64,8 +63,8 @@ const handleContinue=(id:string)=>{
         </div>
       </Card.Body>
     </Card>
-    {success && show && <Alert variant="success" onClose={()=>setShow(false)} dismissible>Applied!</Alert>}
-    {error && show && <Alert variant="danger" onClose={()=>setShow(false)} dismissible>You applied before!</Alert>}
+    {success && <Alert variant="success" onClose={()=>setSuccess(false)} dismissible>Applied!</Alert>}
+    {error &&  <Alert variant="danger" onClose={()=>setError(false)} dismissible>You applied before!</Alert>}
     {isApplied &&
         ( <div
        className="modal show"

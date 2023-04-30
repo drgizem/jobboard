@@ -44,3 +44,40 @@
     -moz-transform: translateX(0)
     -webkit-transform: translateX(0)
     transform: translateX(0)
+
+@mixin scroll-sm
+  text-align: right
+  font-size: larger
+  color: rgb(82, 128, 40)
+  font-weight: 600
+  -moz-transform: translateX(0)
+  -webkit-transform: translateX(0)
+  transform: translateX(0)
+  -moz-animation: my-animation 10s linear infinite
+  -webkit-animation: my-animation 10s linear infinite
+  animation: my-animation 10s linear infinite
+
+@-moz-keyframes my-animation
+  from
+    -moz-transform: translateX(-75%)
+
+  to
+    -moz-transform: translateX(0)
+
+@-webkit-keyframes my-animation
+  from
+    -webkit-transform: translateX(-75%)
+
+  to
+    -webkit-transform: translateX(0)
+
+@keyframes my-animation
+  from
+    -moz-transform: translateX(-50%)
+    -webkit-transform: translateX(-50%)
+    transform: translateX(-50%)
+
+  to
+    -moz-transform: translateX(0)
+    -webkit-transform: translateX(0)
+    transform: translateX(0)

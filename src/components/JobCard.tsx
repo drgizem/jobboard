@@ -23,7 +23,6 @@ deleteSavedJob(id:string):void
 }
 export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob}:Props)=>{
   const [isApplied,setIsApplied]=useState(false)
-  const [show,setShow]=useState(true)
   const {state,dispatch}=useContext(AuthContext)
   const [resume,setResume]=useState(false)
   const [signin,setSignin]=useState(false)
@@ -104,7 +103,6 @@ export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob}:Props)=>{
   }
   const handleContinue=async(id:string)=>{
     setIsApplied(false)
-    setShow(true)
     onApply(job.id)
     const jobAgain=appliedList.find(item=>item.id===id)
     jobAgain ? setError(true) : setSuccess(true)
@@ -143,8 +141,8 @@ export const JobCard=({job,onSave,deleteJob,onApply,deleteSavedJob}:Props)=>{
               </div></Row>
             </Card.Body>
           </Card>
-          {success && show && <Alert variant="success" onClose={()=>setShow(false)} dismissible>Applied!</Alert>}
-          {error && show && <Alert variant="danger" onClose={()=>setShow(false)} dismissible>You applied before!</Alert>}
+          {success && <Alert variant="success" onClose={()=>setSuccess(false)} dismissible>Applied!</Alert>}
+          {error && <Alert variant="danger" onClose={()=>setError(false)} dismissible>You applied before!</Alert>}
           {isApplied &&
             ( <div
            className="modal show"

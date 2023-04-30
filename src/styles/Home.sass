@@ -14,8 +14,11 @@
   &:focus
     border-color: $main-color !important
     box-shadow: 1px 1px $main-color !important
+@media (max-width: 600px)
+  .scroll-text
+    @include scroll-sm
 .scroll-text
-  @include scroll-text
+    @include scroll-text
 .jobs
   gap: 7px
   font-family: $font-main
