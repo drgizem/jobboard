@@ -27,7 +27,7 @@ export const Navbarmodal=()=>{
   }
 
   return(
-    <Navbar expand="lg" bg="dark" variant="dark" className='navbar'>
+    <Navbar expand="lg" variant="dark" className='navbar'>
       <Container>
         <Navbar.Brand className="nav">
         <Link to="/"><img className="icon" src={clover} alt=""/></Link>
