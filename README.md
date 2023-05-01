@@ -2,7 +2,7 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-View demo: [Click here](https://main--gleaming-gingersnap-14a642.netlify.app/)
+View demo: [Click here](https://gleaming-gingersnap-14a642.netlify.app/)
 
 ## Technologies used:
 - React js
